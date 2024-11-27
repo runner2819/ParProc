@@ -1,0 +1,7 @@
+1) Bhat S., Grosser T. Lambda the ultimate SSA: optimizing functional programs in SSA //2022 IEEE/ACM International Symposium on Code Generation and Optimization (CGO). – IEEE, 2022. – С. 1-11.
+2) Chen T. et al. A review of zk-SNARKs //arXiv preprint arXiv:2202.06877. – 2022.
+3) Drevon G. SoK: Compiling programs for integration with multiple ZKP systems. – 2020.
+4) Lavin R. et al. A Survey on the Applications of Zero-Knowledge Proofs //arXiv preprint arXiv:2408.00243. – 2024.
+5) Nitulescu A. zk-SNARKs: A gentle introduction //Ecole Normale Superieure. – 2020.
+6) Novillo D. Design and implementation of Tree SSA //Proceedings of GCC developers summit. – 2004. – С. 119-130
+7) Van Emmerik M. J. Static single assignment for decompilation. – University of Queensland, 2007

@@ -1,0 +1,624 @@
+\section{Графики}
+
+%Графики получены усреднением замеров для 30 массивов размера $10^{8}$ при использовании
+%последовательности изначально предложенной Шеллом ($\frac{N}{2}, \frac{N}{4}, ..., 1$)\\
+
+
+%static,static 1000,static 10000
+\def \timesa{(1,0.062579)(2,0.031492)(3,0.021588)(4,0.016566)(5,0.013433)(6,0.011234)(7,0.009801)(8,0.009155)(9,0.010428)(10,0.010228)}
+\def \accsa{(1,1.000000)(2,1.987156)(3,2.898727)(4,3.777484)(5,4.658734)(6,5.570479)(7,6.385017)(8,6.835612)(9,6.000998)(10,6.118205)}
+\def \effsa{(1,1.000000)(2,0.993578)(3,0.966242)(4,0.944371)(5,0.931747)(6,0.928413)(7,0.912145)(8,0.854451)(9,0.666778)(10,0.611820)}
+
+\def \timesb{(1,0.063168)(2,0.032296)(3,0.023897)(4,0.018549)(5,0.015340)(6,0.013317)(7,0.012162)(8,0.011443)(9,0.013434)(10,0.013111)}
+\def \accsb{(1,1.000000)(2,1.955904)(3,2.643406)(4,3.405405)(5,4.117757)(6,4.743437)(7,5.194112)(8,5.520313)(9,4.702003)(10,4.817959)}
+\def \effsb{(1,1.000000)(2,0.977952)(3,0.881135)(4,0.851351)(5,0.823551)(6,0.790573)(7,0.742016)(8,0.690039)(9,0.522445)(10,0.481796)}
+
+\def \timesc{(1,0.062444)(2,0.031675)(3,0.021755)(4,0.016450)(5,0.013572)(6,0.011432)(7,0.009973)(8,0.008833)(9,0.010666)(10,0.010272)}
+\def \accsc{(1,1.000000)(2,1.971377)(3,2.870330)(4,3.796086)(5,4.600975)(6,5.462092)(7,6.261512)(8,7.069398)(9,5.854486)(10,6.079257)}
+\def \effsc{(1,1.000000)(2,0.985689)(3,0.956777)(4,0.949022)(5,0.920195)(6,0.910349)(7,0.894502)(8,0.883675)(9,0.650498)(10,0.607926)}
+
+%dynamic,dynamic 1000,dynamic 10000
+\def \timeda{(1,0.717159)(2,4.301952)(3,5.987378)(4,4.770334)(5,4.774881)(6,4.587997)(7,5.059636)(8,4.967665)(9,6.962144)(10,7.242229)}
+\def \accda{(1,1.000000)(2,0.166705)(3,0.119778)(4,0.150337)(5,0.150194)(6,0.156312)(7,0.141741)(8,0.144365)(9,0.103008)(10,0.099025)}
+\def \effda{(1,1.000000)(2,0.083353)(3,0.039926)(4,0.037584)(5,0.030039)(6,0.026052)(7,0.020249)(8,0.018046)(9,0.011445)(10,0.009902)}
+
+\def \timedb{(1,0.063067)(2,0.034595)(3,0.027078)(4,0.021294)(5,0.018014)(6,0.015516)(7,0.013730)(8,0.012580)(9,0.012385)(10,0.012098)}
+\def \accdb{(1,1.000000)(2,1.822985)(3,2.329086)(4,2.961727)(5,3.500960)(6,4.064725)(7,4.593240)(8,5.013144)(9,5.092300)(10,5.213189)}
+\def \effdb{(1,1.000000)(2,0.911493)(3,0.776362)(4,0.740432)(5,0.700192)(6,0.677454)(7,0.656177)(8,0.626643)(9,0.565811)(10,0.521319)}
+
+\def \timedc{(1,0.062404)(2,0.032361)(3,0.021989)(4,0.016860)(5,0.013697)(6,0.011528)(7,0.010039)(8,0.009720)(9,0.009411)(10,0.008419)}
+\def \accdc{(1,1.000000)(2,1.928414)(3,2.838001)(4,3.701278)(5,4.556125)(6,5.413460)(7,6.216012)(8,6.420074)(9,6.630802)(10,7.411933)}
+\def \effdc{(1,1.000000)(2,0.964207)(3,0.946000)(4,0.925319)(5,0.911225)(6,0.902243)(7,0.888002)(8,0.802509)(9,0.736756)(10,0.741193)}
+
+
+%auto
+\def \timea{(1,0.062344)(2,0.031309)(3,0.021526)(4,0.016282)(5,0.013379)(6,0.011219)(7,0.009650)(8,0.008681)(9,0.010073)(10,0.009865)}
+\def \acca{(1,1.000000)(2,1.991230)(3,2.896211)(4,3.829013)(5,4.659668)(6,5.557062)(7,6.460261)(8,7.181684)(9,6.189375)(10,6.319674)}
+\def \effa{(1,1.000000)(2,0.995615)(3,0.965404)(4,0.957253)(5,0.931934)(6,0.926177)(7,0.922894)(8,0.897711)(9,0.687708)(10,0.631967)}
+
+
+%guided, guided 1000,guided 10000
+\def \timega{(1,0.062357)(2,0.031225)(3,0.021500)(4,0.016196)(5,0.013275)(6,0.011213)(7,0.009669)(8,0.008533)(9,0.008383)(10,0.008309)}
+\def \accga{(1,1.000000)(2,1.997018)(3,2.900323)(4,3.850056)(5,4.697478)(6,5.560899)(7,6.449386)(8,7.307850)(9,7.438800)(10,7.504737)}
+\def \effga{(1,1.000000)(2,0.998509)(3,0.966774)(4,0.962514)(5,0.939496)(6,0.926816)(7,0.921341)(8,0.913481)(9,0.826533)(10,0.750474)}
+
+\def \timegb{(1,0.062394)(2,0.031226)(3,0.021475)(4,0.016153)(5,0.013259)(6,0.011247)(7,0.009655)(8,0.008518)(9,0.008558)(10,0.008153)}
+\def \accgb{(1,1.000000)(2,1.998176)(3,2.905475)(4,3.862776)(5,4.705987)(6,5.547449)(7,6.462103)(8,7.325072)(9,7.290443)(10,7.653254)}
+\def \effgb{(1,1.000000)(2,0.999088)(3,0.968492)(4,0.965694)(5,0.941197)(6,0.924575)(7,0.923158)(8,0.915634)(9,0.810049)(10,0.765325)}
+
+\def \timegc{(1,0.062355)(2,0.031276)(3,0.021486)(4,0.016163)(5,0.013260)(6,0.011178)(7,0.009734)(8,0.008521)(9,0.008331)(10,0.008084)}
+\def \accgc{(1,1.000000)(2,1.993673)(3,2.902121)(4,3.857791)(5,4.702558)(6,5.578545)(7,6.405674)(8,7.317997)(9,7.484720)(10,7.713239)}
+\def \effgc{(1,1.000000)(2,0.996837)(3,0.967374)(4,0.964448)(5,0.940512)(6,0.929758)(7,0.915096)(8,0.914750)(9,0.831636)(10,0.771324)}
+
+%static
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\pgfplotsset{
+			every axis legend/.append style={ at={(1.05,0.95)}, anchor=outer north east,legend columns = 1}
+		}
+		\begin{axis}[
+			scale=1.5,
+			title={Зависимость времени выполнения от количества потоков},
+			xlabel={Количество потоков},
+			ylabel={Время выполнения, c},
+			every y tick scale label/.style={at={(yticklabel* cs:1.02,0cm)},anchor=near yticklabel},
+			yticklabel style={ /pgf/number format/.cd, fixed, precision=3, /tikz/.cd},
+			xtick=data,
+			xmajorgrids=true,
+			ymajorgrids=true,
+			grid style=dashed,
+			legend pos=outer north east,
+			%			ybar stacked,
+			]
+			\addplot[
+			color=blue,
+			] coordinates {
+				\timesa
+			};
+			\addlegendentry{static}
+
+			\addplot[
+			color=green,
+			] coordinates {
+				\timesb
+			};
+			\addlegendentry{static 1000}
+
+			\addplot[
+			color=red,
+			] coordinates {
+				\timesc
+			};
+			\addlegendentry{static 10000}
+
+		\end{axis}
+	\end{tikzpicture}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			scale=1.5,
+			title={Зависимость ускорения программы от количества потоков},
+			xlabel={Количество потоков},
+			ylabel={Ускорение},
+			legend pos=outer north east,
+			xtick=data,
+			every y tick scale label/.style={at={(yticklabel* cs:1.02,0cm)},anchor=near yticklabel},
+			yticklabel style={ /pgf/number format/.cd, fixed, precision=3, /tikz/.cd},
+			xmajorgrids=true,
+			ymajorgrids=true,
+			grid style=dashed,
+			%			ybar stacked,
+			]
+			\addplot[
+			color=blue,
+			] coordinates {
+				\accsa
+			};
+			\addlegendentry{static}
+
+			\addplot[
+			color=green,
+			] coordinates {
+				\accsb
+			};
+			\addlegendentry{static 1000}
+
+			\addplot[
+			color=red,
+			] coordinates {
+				\accsc
+			};
+			\addlegendentry{static 10000}
+
+			%			\addplot[ color=orange, samples=8, domain=1:8 ] {x}; \addlegendentry{Теория}
+		\end{axis}
+	\end{tikzpicture}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			scale=1.5,
+			title={Зависимость эффективности программы от количества потоков},
+			xlabel={Количество потоков},
+			ylabel={Эффективность},
+			legend pos=outer north east,
+			xtick=data,
+			ymin=0,
+			every y tick scale label/.style={at={(yticklabel* cs:1.02,0cm)},anchor=near yticklabel},
+			yticklabel style={ /pgf/number format/.cd, fixed, precision=3, /tikz/.cd},
+			xmajorgrids=true,
+			ymajorgrids=true,
+			grid style=dashed,
+			]
+
+			\addplot[
+			color=blue,
+			] coordinates {
+				\effsa
+			};
+			\addlegendentry{static}
+
+			\addplot[
+			color=green,
+			] coordinates {
+				\effsb
+			};
+			\addlegendentry{static 1000}
+
+			\addplot[
+			color=red,
+			] coordinates {
+				\effsc
+			};
+			\addlegendentry{static 10000}
+
+			%					\addplot[ color=orange, domain=1:8, samples=8, ] {1}; \addlegendentry{Теория}
+		\end{axis}
+	\end{tikzpicture}
+\end{figure}
+%dynamic
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\pgfplotsset{
+			every axis legend/.append style={ at={(1.05,0.95)}, anchor=outer north east,legend columns = 1}
+		}
+		\begin{axis}[
+			scale=1.5,
+			title={Зависимость времени выполнения от количества потоков},
+			xlabel={Количество потоков},
+			ylabel={Время выполнения, c},
+			every y tick scale label/.style={at={(yticklabel* cs:1.02,0cm)},anchor=near yticklabel},
+			yticklabel style={ /pgf/number format/.cd, fixed, precision=3, /tikz/.cd},
+			xtick=data,
+			xmajorgrids=true,
+			ymajorgrids=true,
+			grid style=dashed,
+			legend pos=outer north east,
+			%			ybar stacked,
+			]
+			\addplot[
+			color=blue,
+			] coordinates {
+				\timeda
+			};
+			\addlegendentry{dynamic}
+
+			\addplot[
+			color=green,
+			] coordinates {
+				\timedb
+			};
+			\addlegendentry{dynamic 1000}
+
+			\addplot[
+			color=red,
+			] coordinates {
+				\timedc
+			};
+			\addlegendentry{dynamic 10000}
+
+		\end{axis}
+	\end{tikzpicture}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			scale=1.5,
+			title={Зависимость ускорения программы от количества потоков},
+			xlabel={Количество потоков},
+			ylabel={Ускорение},
+			legend pos=outer north east,
+			xtick=data,
+			every y tick scale label/.style={at={(yticklabel* cs:1.02,0cm)},anchor=near yticklabel},
+			yticklabel style={ /pgf/number format/.cd, fixed, precision=3, /tikz/.cd},
+			xmajorgrids=true,
+			ymajorgrids=true,
+			grid style=dashed,
+			%			ybar stacked,
+			]
+			\addplot[
+			color=blue,
+			] coordinates {
+				\accda
+			};
+			\addlegendentry{dynamic}
+
+			\addplot[
+			color=green,
+			] coordinates {
+				\accdb
+			};
+			\addlegendentry{dynamic 1000}
+
+			\addplot[
+			color=red,
+			] coordinates {
+				\accdc
+			};
+			\addlegendentry{dynamic 10000}
+
+			%			\addplot[ color=orange, samples=8, domain=1:8 ] {x}; \addlegendentry{Теория}
+		\end{axis}
+	\end{tikzpicture}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			scale=1.5,
+			title={Зависимость эффективности программы от количества потоков},
+			xlabel={Количество потоков},
+			ylabel={Эффективность},
+			legend pos=outer north east,
+			xtick=data,
+			ymin=0,
+			every y tick scale label/.style={at={(yticklabel* cs:1.02,0cm)},anchor=near yticklabel},
+			yticklabel style={ /pgf/number format/.cd, fixed, precision=3, /tikz/.cd},
+			xmajorgrids=true,
+			ymajorgrids=true,
+			grid style=dashed,
+			]
+
+			\addplot[
+			color=blue,
+			] coordinates {
+				\effda
+			};
+			\addlegendentry{dynamic}
+
+			\addplot[
+			color=green,
+			] coordinates {
+				\effdb
+			};
+			\addlegendentry{dynamic 1000}
+
+			\addplot[
+			color=red,
+			] coordinates {
+				\effdc
+			};
+			\addlegendentry{dynamic 10000}
+
+			%					\addplot[ color=orange, domain=1:8, samples=8, ] {1}; \addlegendentry{Теория}
+		\end{axis}
+	\end{tikzpicture}
+\end{figure}
+%guided
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\pgfplotsset{
+			every axis legend/.append style={ at={(1.05,0.95)}, anchor=outer north east,legend columns = 1}
+		}
+		\begin{axis}[
+			scale=1.5,
+			title={Зависимость времени выполнения от количества потоков},
+			xlabel={Количество потоков},
+			ylabel={Время выполнения, c},
+			every y tick scale label/.style={at={(yticklabel* cs:1.02,0cm)},anchor=near yticklabel},
+			yticklabel style={ /pgf/number format/.cd, fixed, precision=3, /tikz/.cd},
+			xtick=data,
+			xmajorgrids=true,
+			ymajorgrids=true,
+			grid style=dashed,
+			legend pos=outer north east,
+			%			ybar stacked,
+			]
+			\addplot[
+			color=blue,
+			] coordinates {
+				\timega
+			};
+			\addlegendentry{guided}
+
+			\addplot[
+			color=green,
+			] coordinates {
+				\timegb
+			};
+			\addlegendentry{guided 1000}
+
+			\addplot[
+			color=red,
+			] coordinates {
+				\timegc
+			};
+			\addlegendentry{guided 10000}
+
+		\end{axis}
+	\end{tikzpicture}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			scale=1.5,
+			title={Зависимость ускорения программы от количества потоков},
+			xlabel={Количество потоков},
+			ylabel={Ускорение},
+			legend pos=outer north east,
+			xtick=data,
+			every y tick scale label/.style={at={(yticklabel* cs:1.02,0cm)},anchor=near yticklabel},
+			yticklabel style={ /pgf/number format/.cd, fixed, precision=3, /tikz/.cd},
+			xmajorgrids=true,
+			ymajorgrids=true,
+			grid style=dashed,
+			%			ybar stacked,
+			]
+			\addplot[
+			color=blue,
+			] coordinates {
+				\accga
+			};
+			\addlegendentry{guided}
+
+			\addplot[
+			color=green,
+			] coordinates {
+				\accgb
+			};
+			\addlegendentry{guided 1000}
+
+			\addplot[
+			color=red,
+			] coordinates {
+				\accgc
+			};
+			\addlegendentry{guided 10000}
+
+			%			\addplot[ color=orange, samples=8, domain=1:8 ] {x}; \addlegendentry{Теория}
+		\end{axis}
+	\end{tikzpicture}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			scale=1.5,
+			title={Зависимость эффективности программы от количества потоков},
+			xlabel={Количество потоков},
+			ylabel={Эффективность},
+			legend pos=outer north east,
+			xtick=data,
+			ymin=0,
+			every y tick scale label/.style={at={(yticklabel* cs:1.02,0cm)},anchor=near yticklabel},
+			yticklabel style={ /pgf/number format/.cd, fixed, precision=3, /tikz/.cd},
+			xmajorgrids=true,
+			ymajorgrids=true,
+			grid style=dashed,
+			]
+
+			\addplot[
+			color=blue,
+			] coordinates {
+				\effga
+			};
+			\addlegendentry{guided}
+
+			\addplot[
+			color=green,
+			] coordinates {
+				\effgb
+			};
+			\addlegendentry{guided 1000}
+
+			\addplot[
+			color=red,
+			] coordinates {
+				\effgc
+			};
+			\addlegendentry{guided 10000}
+
+			%					\addplot[ color=orange, domain=1:8, samples=8, ] {1}; \addlegendentry{Теория}
+		\end{axis}
+	\end{tikzpicture}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\pgfplotsset{
+			every axis legend/.append style={ at={(1.05,0.95)}, anchor=outer north east,legend columns = 1}
+		}
+		\begin{axis}[
+			scale=1.5,
+			title={Зависимость времени выполнения от количества потоков},
+			xlabel={Количество потоков},
+			ylabel={Время выполнения, c},
+			every y tick scale label/.style={at={(yticklabel* cs:1.02,0cm)},anchor=near yticklabel},
+			yticklabel style={ /pgf/number format/.cd, fixed, precision=3, /tikz/.cd},
+			xtick=data,
+			xmajorgrids=true,
+			ymajorgrids=true,
+			grid style=dashed,
+			legend pos=outer north east,
+			%			ybar stacked,
+			]
+			\addplot[
+			color=blue,
+			] coordinates {
+				\timesa
+			};
+			\addlegendentry{static}
+
+			\addplot[
+			color=green,
+			] coordinates {
+				\timedc
+			};
+			\addlegendentry{dynamic 10000}
+
+			\addplot[
+			color=orange,
+			] coordinates {
+				\timega
+			};
+			\addlegendentry{guided}
+
+			\addplot[
+			color=red,
+			] coordinates {
+				\timegc
+			};
+			\addlegendentry{guided 10000}
+
+			\addplot[
+			color=teal,
+			] coordinates {
+				\timea
+			};
+			\addlegendentry{auto}
+
+			%			\addplot[ color=orange, samples=8, domain=1:8 ] {\thtime};
+			%			\addlegendentry{Теория}
+		\end{axis}
+	\end{tikzpicture}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			scale=1.5,
+			title={Зависимость ускорения программы от количества потоков},
+			xlabel={Количество потоков},
+			ylabel={Ускорение},
+			legend pos=outer north east,
+			xtick=data,
+			every y tick scale label/.style={at={(yticklabel* cs:1.02,0cm)},anchor=near yticklabel},
+			yticklabel style={ /pgf/number format/.cd, fixed, precision=3, /tikz/.cd},
+			xmajorgrids=true,
+			ymajorgrids=true,
+			grid style=dashed,
+			%			ybar stacked,
+			]
+			\addplot[
+			color=blue,
+			] coordinates {
+				\accsa
+			};
+			\addlegendentry{static}
+
+			\addplot[
+			color=green,
+			] coordinates {
+				\accdc
+			};
+			\addlegendentry{dynamic 10000}
+
+			\addplot[
+			color=orange,
+			] coordinates {
+				\accga
+			};
+			\addlegendentry{guided }
+
+			\addplot[
+			color=red,
+			] coordinates {
+				\accgc
+			};
+			\addlegendentry{guided 10000}
+
+			\addplot[
+			color=teal,
+			] coordinates {
+				\acca
+			};
+			\addlegendentry{auto}
+
+			%			\addplot[ color=orange, samples=8, domain=1:8 ] {x}; \addlegendentry{Теория}
+		\end{axis}
+	\end{tikzpicture}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+			\begin{axis}[
+					scale=1.5,
+					title={Зависимость эффективности программы от количества потоков},
+					xlabel={Количество потоков},
+					ylabel={Эффективность},
+					legend pos=outer north east,
+					xtick=data,
+					ymin=0,
+					every y tick scale label/.style={at={(yticklabel* cs:1.02,0cm)},anchor=near yticklabel},
+					yticklabel style={ /pgf/number format/.cd, fixed, precision=3, /tikz/.cd},
+					xmajorgrids=true,
+					ymajorgrids=true,
+					grid style=dashed,
+					]
+
+					\addplot[
+					color=blue,
+					] coordinates {
+						\effsa
+					};
+					\addlegendentry{static}
+
+					\addplot[
+					color=green,
+					] coordinates {
+						\effdc
+					};
+					\addlegendentry{dynamic 10000}
+
+					\addplot[
+					color=orange,
+					] coordinates {
+						\effga
+					};
+					\addlegendentry{guided }
+
+					\addplot[
+					color=red,
+					] coordinates {
+						\effgc
+					};
+					\addlegendentry{guided 10000}
+
+					\addplot[
+					color=teal,
+					] coordinates {
+						\effa
+					};
+					\addlegendentry{auto}
+
+%					\addplot[ color=orange, domain=1:8, samples=8, ] {1}; \addlegendentry{Теория}
+				\end{axis}
+		\end{tikzpicture}
+\end{figure}
