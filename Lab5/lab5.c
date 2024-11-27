@@ -5,14 +5,24 @@
 //#include <memory.h>
 //#include <omp.h>
 
-void generate_array(long *array, const long count, const long seed) {
+void save_array(FILE *f, const long *array, const long count) {
+    fwrite(array, sizeof(long), count, f);
+}
+
+void read_array(FILE *f, long *array, const long count) {
+    fread(array, sizeof(long), count, f);
+}
+
+void generate_array(FILE *f, long *array, const long count, const long seed) {
     srand(seed);
     for (long i = 0; i < count; i++) {
         array[i] = (long) rand() * rand();
     }
+    save_array(f, array, count);
 }
 
 int main(int argc, char **argv) {
+
     int ret = -1;    ///< For return values
     int size = -1;    ///< Total number of processors
     int rank = -1;    ///< This processor's number
@@ -20,7 +30,7 @@ int main(int argc, char **argv) {
     const long count = 1e8;
     const long random_seed = 920215;
 //    const long threads = omp_get_num_procs();
-    const int num_seed = 10;
+    const int num_seed = 100;
 
     long *array = malloc(count * sizeof(long));
     long lmax = INT64_MIN;    ///< Local maximums
@@ -28,18 +38,36 @@ int main(int argc, char **argv) {
     long max = INT64_MIN;  ///< The maximal element
 
     double start, end, time = 0, ts, te;
-
+//    int i = 1;
+//    while (i) {
+//        sleep(5);
+//    }
     ret = MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//    int flag = 1; //write
+    int flag = 0; //read
+    FILE *f;
+    if (flag) {
+        f = fopen("/Users/maxim/Desktop/All/code/CLionProjects/ParProc/arrays.txt", "w+");
 
+    } else {
+        f = fopen("/Users/maxim/Desktop/All/code/CLionProjects/ParProc/arrays.txt", "r");
+
+    }
     if (!rank) {
         ts = MPI_Wtime();
+    } else {
+        fclose(f);
     }
 
     for (int seed_num = 0; seed_num < num_seed; seed_num++) {
         if (!rank) {
-            generate_array(array, count, random_seed + seed_num * 1024);
+            if (flag) {
+                generate_array(f, array, count, random_seed + seed_num * 1024);
+            } else {
+                read_array(f, array, count);
+            }
         }
         MPI_Bcast(array, count, MPI_LONG, 0, MPI_COMM_WORLD);
 
@@ -50,7 +78,9 @@ int main(int argc, char **argv) {
         start = MPI_Wtime();
 
         for (int i = wstart; i < wend; i++) {
-            if (array[i] > lmax) { lmax = array[i]; }
+            if (array[i] > lmax) {
+                lmax = array[i];
+            }
         }
 
         MPI_Barrier(MPI_COMM_WORLD);
@@ -63,7 +93,7 @@ int main(int argc, char **argv) {
 //    MPI_Barrier(MPI_COMM_WORLD);
 //    double end = MPI_Wtime();
 //        if (!rank) {
-//            printf("*** Global Maximum for seed %d is %ld;\n", seed_num, max);
+//            printf("*** Global Maximum for seed %d is %ld;\n", seed_num, array[1]);
 //        }
 
     }
@@ -79,9 +109,10 @@ int main(int argc, char **argv) {
 //        printf("Eff: %lf\n", 0.070249 / (end - start) / size);
     }
     ret = MPI_Finalize();
-//    if (!rank) {
+    if (!rank) {
+        fclose(f);
 //    main2(count, size, num_seed);
-//    }
+    }
 //    printf("MPI Finalize returned (%d);\n", ret);
     return (0);
 }

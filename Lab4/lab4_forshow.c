@@ -15,7 +15,7 @@ double time_find_max_static(const long *array, const long count, const long thre
     double start_time = omp_get_wtime();
 #pragma omp parallel num_threads(threads) shared(array, count) reduction(max: max) default(none)
     {
-#pragma omp for schedule(static)
+#pragma omp for
         for (long i = 0; i < count; i++) {
             if (array[i] > max) {
                 max = array[i];
@@ -208,7 +208,8 @@ int main() {
     double test_start = omp_get_wtime();
     const long count = pow(10, 8);
     const long random_seed = 920215;
-    const long threads = omp_get_num_procs();
+//    const long threads = omp_get_num_procs();
+    const long threads = 8;
     const int num_seed = 10;
 
     long *array = malloc(count * sizeof(long));
@@ -237,7 +238,7 @@ int main() {
     double test_end = omp_get_wtime();
     free(array);
 
-    printf("static 1000,static 10000,dynamic 1000,guided 1000\n");
+//    printf("static 1000,static 10000,dynamic 1000,guided 1000\n");
     printf("\nCount: %lld\nNum_seed: %d\n", count, num_seed);
     printf("Total time:%lf\n", test_end - test_start);
     print_stats(s1, threads, num_seed);
