@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <mpi.h>
 #include <unistd.h>
-//#include <memory.h>
 //#include <omp.h>
 
 void save_array(FILE *f, const long *array, const long count) {
@@ -22,7 +21,6 @@ void generate_array(FILE *f, long *array, const long count, const long seed) {
 }
 
 int main(int argc, char **argv) {
-
     int ret = -1;    ///< For return values
     int size = -1;    ///< Total number of processors
     int rank = -1;    ///< This processor's number
@@ -50,10 +48,8 @@ int main(int argc, char **argv) {
     FILE *f;
     if (flag) {
         f = fopen("/Users/maxim/Desktop/All/code/CLionProjects/ParProc/arrays.txt", "w+");
-
     } else {
         f = fopen("/Users/maxim/Desktop/All/code/CLionProjects/ParProc/arrays.txt", "r");
-
     }
     if (!rank) {
         ts = MPI_Wtime();
