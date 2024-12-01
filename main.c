@@ -33,19 +33,31 @@
 //        memcpy(clone + t, ar + t, (tt - t) * sizeof(int));
 //    }
 //}
+int is_prime(int n) {
+    int cnt = 0;
+    if (n <= 1) {
+        return 0;
+    } else {
+        for (int i = 1; i <= n; i++) {
+            if (n % i == 0)
+                cnt++;
+        }
+        if (cnt > 2) {
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+}
 
 int main() {
-    long i = 0;
-    long count = 1e8;
-    int *array = (int *) malloc(count * sizeof(int));
-    for (int i = 0; i < count; i++) {
-        array[i] = rand();
+    unsigned long long t = 1;
+    for (int i = 0; i < 100; i++) {
+        if (is_prime(i)) {
+            t *= i;
+        }
     }
-    for (int i = 0; i < count; i++) {
-        printf("%d ", array[i]);
-    }
-    sleep(10);
-    printf("\n");
+    printf("%lld", t);
 //    printf("%d %d %d %d", sizeof(int), sizeof(long), sizeof(long int), sizeof(long long));
 //    int count = pow(10, 5)+10;
 //    int *ar = malloc(count * sizeof(int));

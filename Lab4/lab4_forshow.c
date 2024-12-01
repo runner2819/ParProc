@@ -223,10 +223,10 @@ int main() {
         generate_array(array, count, random_seed + seed_num * 1024);
 
         for (int n = 1; n <= threads; n++) {
-            s1[n - 1] += time_find_max_static(array, count, n);
+//            s1[n - 1] += time_find_max_static(array, count, n);
 //            s1[n - 1] += time_find_max_static3(array, count, n);
 //            s2[n - 1] += time_find_max_static4(array, count, n);
-//            s3[n - 1] += time_find_max_dynamic3(array, count, n);
+            s3[n - 1] += time_find_max_dynamic3(array, count, n);
 //            s4[n - 1] += time_find_max_guided3(array, count, n);
 //            s1[n - 1] += time_find_max_static(array, count, n);
 //            s2[n - 1] += time_find_max_dynamic4(array, count, n);

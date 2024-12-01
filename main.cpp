@@ -35,7 +35,7 @@
 //}
 
 int main() {
-    printf("%d %d %d %d", sizeof(int), sizeof(long), sizeof(long int), sizeof(long long));
+//    printf("%d %d %d %d", sizeof(int), sizeof(long), sizeof(long int), sizeof(long long));
 //    int count = pow(10, 5)+10;
 //    int *ar = malloc(count * sizeof(int));
 //    int *ar2 = malloc(count * sizeof(int));

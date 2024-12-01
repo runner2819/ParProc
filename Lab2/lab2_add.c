@@ -15,7 +15,7 @@ int *generate_array(const int count, const int seed) {
 }
 
 double find_index_range_of_elem(const int *array, const int count, const int target, const int threads) {
-    int l_index = INT32_MAX;
+    int l_index = count;
     int r_index = -1;
     double time_required = 0;
     double start = omp_get_wtime();
