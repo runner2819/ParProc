@@ -52,7 +52,7 @@ if (OpenMP_C_FOUND)
     #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     #    target_link_libraries(Lab5 PRIVATE ${OpenMP_C_LIBRARIES})
     #    target_link_libraries(Lab2 PRIVATE ${OpenMP_C_LIBRARIES})
-    target_link_libraries(Lab4 PRIVATE ${OpenMP_C_LIBRARIES})
+    target_link_libraries(Lab3 PRIVATE ${OpenMP_C_LIBRARIES})
 endif ()
 
 target_link_libraries(Lab5 PRIVATE MPI::MPI_C)
