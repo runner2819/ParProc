@@ -58,12 +58,12 @@ double time_find_max_static4(const long *array, const long count, const long thr
     return end_time - start_time;
 }
 
-double time_find_max_dynamic3(const long *array, const long count, const long threads) {
+double time_find_max_dynamic(const long *array, const long count, const long threads) {
     long max = INT64_MIN;
     double start_time = omp_get_wtime();
 #pragma omp parallel num_threads(threads) shared(array, count) reduction(max: max) default(none)
     {
-#pragma omp for schedule(dynamic, 1000)
+#pragma omp for schedule(dynamic)
         for (long i = 0; i < count; i++) {
             if (array[i] > max) {
                 max = array[i];
@@ -74,12 +74,12 @@ double time_find_max_dynamic3(const long *array, const long count, const long th
     return end_time - start_time;
 }
 
-double time_find_max_dynamic1(const long *array, const long count, const long threads) {
+double time_find_max_dynamic3(const long *array, const long count, const long threads) {
     long max = INT64_MIN;
     double start_time = omp_get_wtime();
 #pragma omp parallel num_threads(threads) shared(array, count) reduction(max: max) default(none)
     {
-#pragma omp for schedule(dynamic)
+#pragma omp for schedule(dynamic, 1000)
         for (long i = 0; i < count; i++) {
             if (array[i] > max) {
                 max = array[i];
@@ -106,12 +106,12 @@ double time_find_max_dynamic4(const long *array, const long count, const long th
     return end_time - start_time;
 }
 
-double time_find_max_guided2(const long *array, const long count, const long threads) {
+double time_find_max_guided(const long *array, const long count, const long threads) {
     long max = INT64_MIN;
     double start_time = omp_get_wtime();
 #pragma omp parallel num_threads(threads) shared(array, count) reduction(max: max) default(none)
     {
-#pragma omp for schedule(guided, 100)
+#pragma omp for schedule(guided)
         for (long i = 0; i < count; i++) {
             if (array[i] > max) {
                 max = array[i];
@@ -144,22 +144,6 @@ double time_find_max_guided4(const long *array, const long count, const long thr
 #pragma omp parallel num_threads(threads) shared(array, count) reduction(max: max) default(none)
     {
 #pragma omp for schedule(guided, 10000)
-        for (long i = 0; i < count; i++) {
-            if (array[i] > max) {
-                max = array[i];
-            }
-        }
-    }
-    double end_time = omp_get_wtime();
-    return end_time - start_time;
-}
-
-double time_find_max_guided1(const long *array, const long count, const long threads) {
-    long max = INT64_MIN;
-    double start_time = omp_get_wtime();
-#pragma omp parallel num_threads(threads) shared(array, count) reduction(max: max) default(none)
-    {
-#pragma omp for schedule(guided)
         for (long i = 0; i < count; i++) {
             if (array[i] > max) {
                 max = array[i];
@@ -205,32 +189,40 @@ void print_stats(const double *s, const int threads, const int num_seed) {
 }
 
 int main() {
+    printf("omp_get_num_procs and omp_get_max_threads : %d %d\n", omp_get_num_procs(), omp_get_max_threads());
+    printf("omp_get_dynamic: %d\n", omp_get_dynamic());
+    printf("omp_get_wtick: %lf\n", omp_get_wtick());
+    printf("omp_get_nested: %d\n", omp_get_nested());
+    printf("omp_get_max_active_levels: %d\n", omp_get_max_active_levels());
+    omp_sched_t kind;
+    int chunk_size;
+    omp_get_schedule(&kind, &chunk_size);
+    printf("omp_get_schedule: %d %d\n", kind, chunk_size);
     double test_start = omp_get_wtime();
     const long count = pow(10, 8);
     const long random_seed = 920215;
-//    const long threads = omp_get_num_procs();
-    const long threads = 8;
+    const long threads = omp_get_num_procs();
+//    const long threads = 8;
     const int num_seed = 10;
 
     long *array = malloc(count * sizeof(long));
     double *s1 = calloc(omp_get_num_procs(), sizeof(double));
-    double *s2 = calloc(omp_get_num_procs(), sizeof(double));
-    double *s3 = calloc(omp_get_num_procs(), sizeof(double));
-    double *s4 = calloc(omp_get_num_procs(), sizeof(double));
+//    double *s2 = calloc(omp_get_num_procs(), sizeof(double));
+//    double *s3 = calloc(omp_get_num_procs(), sizeof(double));
+//    double *s4 = calloc(omp_get_num_procs(), sizeof(double));
 //    double *s5 = calloc(omp_get_num_procs(), sizeof(double));
 
     for (int seed_num = 0; seed_num < num_seed; seed_num++) {
         generate_array(array, count, random_seed + seed_num * 1024);
 
         for (int n = 1; n <= threads; n++) {
-//            s1[n - 1] += time_find_max_static(array, count, n);
+            s1[n - 1] += time_find_max_static(array, count, n);
 //            s1[n - 1] += time_find_max_static3(array, count, n);
 //            s2[n - 1] += time_find_max_static4(array, count, n);
-            s3[n - 1] += time_find_max_dynamic3(array, count, n);
+//            s3[n - 1] += time_find_max_dynamic3(array, count, n);
 //            s4[n - 1] += time_find_max_guided3(array, count, n);
-//            s1[n - 1] += time_find_max_static(array, count, n);
-//            s2[n - 1] += time_find_max_dynamic4(array, count, n);
-//            s3[n - 1] += time_find_max_guided1(array, count, n);
+//            s5[n - 1] += time_find_max_dynamic4(array, count, n);
+//            s3[n - 1] += time_find_max_guided(array, count, n);
 //            s4[n - 1] += time_find_max_guided4(array, count, n);
 //            s5[n - 1] += time_find_max_auto(array, count, n);
         }
