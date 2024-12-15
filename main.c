@@ -50,14 +50,39 @@ int is_prime(int n) {
     }
 }
 
-int main() {
-    unsigned long long t = 1;
-    for (int i = 0; i < 100; i++) {
-        if (is_prime(i)) {
-            t *= i;
-        }
+void print_stats(const double *s, const int threads) {
+    for (int i = 1; i <= threads; i++) {
+        printf("%d & %lf & %lf & %lf \\\\ \\hline \n", i, s[i - 1], s[0] / s[i - 1], s[0] / s[i - 1] / i);
     }
-    printf("%lld", t);
+}
+
+int main() {
+//    double s[10] = {0.066684, 0.033366, 0.022494, 0.016973, 0.014038, 0.011782, 0.010492, 0.009651, 0.011957, 0.014164};
+//    print_stats(s, 10);
+    long count = 1e7;
+    int size = 6;
+    long tmp = count / size;
+    long s1 = 0;
+    long s2 = 0;
+    long *counts = malloc(size * sizeof(long));
+    long *displs = malloc(size * sizeof(long));
+    for (int i = 0; i < size; i++) {
+        counts[i] = (long) (i + 1) * count / size - (long) i * count / size;
+        displs[i] = (long) i * count / size;
+    }
+    for (int i = 0; i < size; i++) {
+        s1 += displs[i];
+        s2 += counts[i];
+    }
+    printf("dsfg");
+//    s={};
+//    unsigned long long t = 1;
+//    for (int i = 0; i < 100; i++) {
+//        if (is_prime(i)) {
+//            t *= i;
+//        }
+//    }
+//    printf("%lld", t);
 //    printf("%d %d %d %d", sizeof(int), sizeof(long), sizeof(long int), sizeof(long long));
 //    int count = pow(10, 5)+10;
 //    int *ar = malloc(count * sizeof(int));

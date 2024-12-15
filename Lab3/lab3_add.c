@@ -92,30 +92,10 @@ int main(int argc, char **argv) {
     for (int i = 1; i <= threads; i++) {
         printf("(%d,%lf)", i, s[i - 1] / num_seed);
     }
-    printf("\nEff:\n");
-    for (int i = 1; i <= threads; i++) {
-        double sum = 0;
-        for (int j = 0; j < s_gap; j++) {
-            sum += (double) 1 / gaps[j];
-        }
-        double sum2 = 0;
-        for (int j = 0; j < s_gap; j++) {
-            if (gaps[j] < i) break;
-            sum2 += (double) 1 / gaps[j];
-        }
-        sum2 /= i;
-        double sum3 = 0;
-        for (int j = s_gap - 1; j > -1; j--) {
-            if (gaps[j] >= i) break;
-            sum3 += (double) 1 / gaps[j] / (i-gaps[j]);
-        }
-        printf("(%d,%lf)", i, sum / (sum2 + sum3)/i);
-    }
-    printf("\nTheory Acceleration:\n");
+    printf("\nAcceleration:\n");
     for (int i = 1; i <= threads; i++) {
         printf("(%d,%lf)", i, s[0] / s[i - 1]);
     }
-
     printf("\nEfficiency:\n");
     for (int i = 1; i <= threads; i++) {
         printf("(%d,%lf)", i, s[0] / s[i - 1] / i);
