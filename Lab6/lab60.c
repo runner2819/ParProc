@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <mpi.h>
 #include <unistd.h>
-#include <omp.h>
+//#include <omp.h>
 #include <math.h>
 
 void generate_array(long *array, const int count, const int seed) {
@@ -106,11 +106,11 @@ int main(int argc, char **argv) {
         }
         int chunk_size = counts[rank];
         long *chunk = malloc(part_size * sizeof(long));
-        MPI_Barrier(MPI_COMM_WORLD);
-        start = MPI_Wtime();
+
 
         MPI_Scatterv(array, counts, displs, MPI_LONG, chunk, part_size, MPI_LONG, 0, MPI_COMM_WORLD);
-
+        MPI_Barrier(MPI_COMM_WORLD);
+        start = MPI_Wtime();
         sort(chunk, chunk_size, gaps, s_gap);
 
         long *other;

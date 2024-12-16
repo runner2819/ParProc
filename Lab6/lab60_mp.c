@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <mpi.h>
 #include <unistd.h>
-#include <omp.h>
 #include <math.h>
 
 void generate_array(long *array, const int count, const int seed) {
@@ -54,7 +53,7 @@ int main(int argc, char **argv) {
     int ret = -1;    ///< For return values
     int size = -1;    ///< Total number of processors
     int rank = -1;    ///< This processor's number
-    const int count = 1e8;
+    const int count = 1e7;
     const long random_seed = 920215;
     const int num_seed = 30;
 
@@ -86,12 +85,6 @@ int main(int argc, char **argv) {
     gaps = realloc(gaps, s_gap * sizeof(int));
 
     double start, end, time = 0, ts, te;
-//    if (!rank) {
-//        int i = 1;
-//        while (i) {
-//            sleep(5);
-//        }
-//    }
 
     if (!rank) {
         ts = MPI_Wtime();
@@ -100,8 +93,6 @@ int main(int argc, char **argv) {
 
     for (int seed_num = 0; seed_num < num_seed; seed_num++) {
         if (!rank) {
-//            for (int i = 0; i < count; i++)
-//                array[i] = count - i;
             generate_array(array, count, random_seed + seed_num * 1024);
         }
         int chunk_size = counts[rank];
@@ -143,11 +134,6 @@ int main(int argc, char **argv) {
         MPI_Barrier(MPI_COMM_WORLD);
         end = MPI_Wtime();
         time += end - start;
-//        if (!rank) {
-//            for (int i = 0; i < count; i++)
-//                printf("%d\n", chunk[i]);
-//            printf("--------------------\n");
-//        }
         free(chunk);
     }
 
@@ -160,13 +146,5 @@ int main(int argc, char **argv) {
         printf("total,avg %lf,%lf\n", te - ts, time / num_seed);
     }
     ret = MPI_Finalize();
-
-//    if (!rank) {
-//        fclose(f);
-//    }
-//    printf("MPI Finalize returned (%d);\n", ret);
     return (0);
 }
-
-
-
