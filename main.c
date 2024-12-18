@@ -50,14 +50,34 @@ int is_prime(int n) {
     }
 }
 
-int main() {
-    unsigned long long t = 1;
-    for (int i = 0; i < 100; i++) {
-        if (is_prime(i)) {
-            t *= i;
-        }
+void print_stats(const double *s, const int threads, const int num_seed) {
+    printf("Time:\n\\def \\time{");
+    for (int i = 1; i <= threads; i++) {
+        printf("(%d,%lf)", i, s[i - 1] / num_seed);
     }
-    printf("%lld", t);
+    printf("}");
+    printf("\nAcceleration:\n\\def \\acc{");
+    for (int i = 1; i <= threads; i++) {
+        printf("(%d,%lf)", i, s[0] / s[i - 1]);
+    }
+    printf("}");
+    printf("\nEfficiency:\n\\def \\eff{");
+    for (int i = 1; i <= threads; i++) {
+        printf("(%d,%lf)", i, s[0] / s[i - 1] / i);
+    }
+    printf("}\n");
+}
+
+int main() {
+    double s[8] = {44.939674, 20.137259, 11.645667, 10.627241, 7.666202, 6.091503, 5.974657, 5.368062};
+    print_stats(s, 8, 1);
+//    unsigned long long t = 1;
+//    for (int i = 0; i < 100; i++) {
+//        if (is_prime(i)) {
+//            t *= i;
+//        }
+//    }
+//    printf("%lld", t);
 //    printf("%d %d %d %d", sizeof(int), sizeof(long), sizeof(long int), sizeof(long long));
 //    int count = pow(10, 5)+10;
 //    int *ar = malloc(count * sizeof(int));

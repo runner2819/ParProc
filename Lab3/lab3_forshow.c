@@ -4,10 +4,6 @@
 #include <math.h>
 #include <memory.h>
 
-int compare(const void *a, const void *b) {
-    return (*(int *) a - *(int *) b);
-}
-
 void generate_array(int *array, const int count, const int seed) {
     srand(seed);
     for (int i = 0; i < count; i++) {
@@ -17,19 +13,17 @@ void generate_array(int *array, const int count, const int seed) {
 
 double sort(int *array, int len, const int threads, const int *gaps, const int s_gap) {
     double time_required;
-//    int *operations = calloc(threads, sizeof(int));
     double start = omp_get_wtime();
     int gap;
     for (int gap_ind = 0; gap_ind < s_gap; gap_ind++) {
         gap = gaps[gap_ind];
-#pragma omp parallel for num_threads(threads) shared(array, len, gap/*, operations*/) default(none)
-        for (int offset = 0; offset < gap; offset++) {
+#pragma omp parallel for num_threads(threads) shared(array, len, gap) default(none)
+        for (int offset = 0; offset < gap; offset++) { // iterate through insert sortings
             int temp, j;
             for (int i = gap + offset; i < len; i += gap) {
                 temp = array[i];
                 for (j = i; (j >= gap) && (array[j - gap] > temp); j -= gap) {
                     array[j] = array[j - gap];
-//                    operations[omp_get_thread_num()]++;
                 }
                 array[j] = temp;
             }
@@ -37,26 +31,15 @@ double sort(int *array, int len, const int threads, const int *gaps, const int s
     }
     double end = omp_get_wtime();
     time_required = end - start;
-//    int sum = 0;
-//    for (int i = 0; i < threads; i++) {
-//        sum += operations[i];
-//    }
-//    printf("\nOps:\n");
-//    for (int i = 1; i <= threads; i++) {
-//        printf("(%d,%lf)", i, (double) operations[i - 1] / sum);
-//    }
-//    printf("\n");
-//    free(operations);
     return time_required;
 }
 
 int main(int argc, char **argv) {
     double test_start = omp_get_wtime();
-    const int count = pow(10, 7);     ///< Number of array elements
-    const int random_seed = 920214; ///< RNG seed
-//    const int threads = omp_get_num_procs();
+    const int count = pow(10, 8);     ///< Number of array elements
+    const int random_seed = 920215; ///< RNG seed
     const int threads = 8;  /// to avoid E-cores on my machine
-    const int num_seed = 10;
+    const int num_seed = 30;
 
     int *gaps = malloc(((int) log2(count) + 10) * sizeof(int));
     int s_gap = 0;
@@ -98,10 +81,6 @@ int main(int argc, char **argv) {
     printf("Time:\n");
     for (int i = 1; i <= threads; i++) {
         printf("(%d,%lf)", i, s[i - 1] / num_seed);
-    }
-    printf("\nTime:\n");
-    for (int i = 1; i <= threads; i++) {
-        printf("%lf ", s[i - 1] / num_seed);
     }
     printf("\nAcceleration:\n");
     for (int i = 1; i <= threads; i++) {

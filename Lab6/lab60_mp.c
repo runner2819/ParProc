@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
     int ret = -1;    ///< For return values
     int size = -1;    ///< Total number of processors
     int rank = -1;    ///< This processor's number
-    const int count = 1e7;
+    const int count = 1e8;
     const long random_seed = 920215;
     const int num_seed = 30;
 
