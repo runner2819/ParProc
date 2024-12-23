@@ -40,11 +40,12 @@ long *merge(long *arr1, long n1, long *arr2, long n2) {
         } else {
             result[k++] = arr2[j++];
         }
-    while (i < n1) {
-        result[k++] = arr1[i++];
+    if (i < n1) {
+        memcpy(result + k, arr1 + i, (n1 - i - 1) * sizeof(long));
     }
-    while (j < n2) {
-        result[k++] = arr2[j++];
+    k += n1 - i - 1;
+    if (j < n2) {
+        memcpy(result + k, arr2 + j, (n2 - j - 1) * sizeof(long));
     }
 
     return result;
@@ -125,12 +126,16 @@ int main(int argc, char **argv) {
 
     free(counts);
     free(displs);
-    free(gaps);
 //    if (!rank) {
     te = omp_get_wtime();
     free(array);
     printf("total,avg %lf,%lf\n", te - ts, time / num_seed);
-//    }
+    free(s_gaps);
+    for (int rank = 0; rank < size; rank++) {
+        free(gaps[rank]);
+    }
+    free(gaps);
+
 //    ret = MPI_Finalize();
-    return (0);
+    return 0;
 }

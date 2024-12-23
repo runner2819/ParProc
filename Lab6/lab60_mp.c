@@ -3,6 +3,7 @@
 #include <mpi.h>
 #include <unistd.h>
 #include <math.h>
+#include <memory.h>
 
 void generate_array(long *array, const int count, const int seed) {
     srand(seed);
@@ -39,13 +40,13 @@ long *merge(long *arr1, long n1, long *arr2, long n2) {
         } else {
             result[k++] = arr2[j++];
         }
-    while (i < n1) {
-        result[k++] = arr1[i++];
+    if (i < n1) {
+        memcpy(result + k, arr1 + i, (n1 - i - 1) * sizeof(long));
     }
-    while (j < n2) {
-        result[k++] = arr2[j++];
+    k += n1 - i - 1;
+    if (j < n2) {
+        memcpy(result + k, arr2 + j, (n2 - j - 1) * sizeof(long));
     }
-
     return result;
 }
 
@@ -53,33 +54,67 @@ int main(int argc, char **argv) {
     int ret = -1;    ///< For return values
     int size = -1;    ///< Total number of processors
     int rank = -1;    ///< This processor's number
-    int divide = 840;
-    const int count = 1e3;
+    int magick = 840;
+    const int count = 1e6;
     const long random_seed = 920215;
     const int num_seed = 30;
-
 
     ret = MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Status status;
 
+//    if (!rank) {
+//        int i = 1;
+//        while (i) {
+//            sleep(1);
+//        }
+//    }
+
     int part_size = (count + size - 1) / size;
 
     long *array;
+    int *counts_m = malloc(magick * sizeof(int));
+    int *displs_m = malloc(magick * sizeof(int));
+    int offset;
+    int part = magick / size;
+    for (int i = 0; i < magick; i++) {
+        counts_m[i] = (long) (i + 1) * count / magick - (long) i * count / magick;
+        if (i % part == 0) {
+            offset = 0;
+        }
+        displs_m[i] = offset;
+        offset += counts_m[i];
+    }
+
+
     int *counts = malloc(size * sizeof(int));
     int *displs = malloc(size * sizeof(int));
-    int offset = 0;
+    offset = 0;
     for (int i = 0; i < size; i++) {
-        counts[i] = (long) (i + 1) * count / size - (long) i * count / size;
+        for (int j = 0; j < part; j++) {
+            counts[i] += counts_m[i * part + j];
+        }
         displs[i] = offset;
         offset += counts[i];
     }
 
+//    int **gaps = malloc(part * sizeof(int *));
+//    int *s_gaps = malloc(part * sizeof(int));
+//    for (int pp = 0; pp < part; pp++) {
+//        gaps[pp] = malloc(((int) log2(counts[pp]) + 10) * sizeof(int));
+//        int s_gap = 0;
+//        for (int step = counts_m[rank * part + pp] / 2; step > 0; step /= 2) {
+//            gaps[pp][s_gap] = step;
+//            s_gap++;
+//        }
+//        gaps[pp] = realloc(gaps[pp], s_gap * sizeof(int));
+//        s_gaps[pp] = s_gap;
+//    }
 
-    int *gaps = malloc(((int) log2(counts[rank]) + 10) * sizeof(int));
+    int *gaps = malloc(((int) log2(counts_m[rank]) + 10) * sizeof(int));
     int s_gap = 0;
-    for (int step = counts[rank] / 2; step > 0; step /= 2) {
+    for (int step = counts_m[rank] / 2; step > 0; step /= 2) {
         gaps[s_gap] = step;
         s_gap++;
     }
@@ -92,18 +127,35 @@ int main(int argc, char **argv) {
         array = malloc(count * sizeof(long));
     }
 
+
     for (int seed_num = 0; seed_num < num_seed; seed_num++) {
         if (!rank) {
             generate_array(array, count, random_seed + seed_num * 1024);
         }
-        int chunk_size = counts[rank];
+//        int chunk_size = counts_m[rank];
         long *chunk = malloc(part_size * sizeof(long));
         MPI_Barrier(MPI_COMM_WORLD);
         start = MPI_Wtime();
 
         MPI_Scatterv(array, counts, displs, MPI_LONG, chunk, part_size, MPI_LONG, 0, MPI_COMM_WORLD);
 
-        sort(chunk, chunk_size, gaps, s_gap);
+        for (int i = 0; i < part; i++) {
+//            sort(chunk + displs_m[rank * part + i], counts_m[rank * part + i], gaps[i], s_gaps[i]);
+            sort(chunk + displs_m[rank * part + i], counts_m[rank * part + i], gaps, s_gap);
+        }
+
+        long *ress = merge(chunk, counts_m[rank * part], chunk + displs_m[rank * part + 1], counts_m[rank * part + 1]);
+        long *tmp;
+        long ress_size = counts_m[rank * part] + counts_m[rank * part + 1];
+        for (int i = 2; i < part; i++) {
+            tmp = merge(ress, ress_size, chunk + displs_m[rank * part + i], counts_m[rank * part + i]);
+            ress_size += counts_m[rank * part + i];
+            free(ress);
+            ress = tmp;
+        }
+        free(chunk);
+        chunk = ress;
+        int chunk_size = ress_size;
 
         long *other;
         int step = 1;
@@ -138,8 +190,8 @@ int main(int argc, char **argv) {
         free(chunk);
     }
 
-    free(counts);
-    free(displs);
+    free(counts_m);
+    free(displs_m);
     free(gaps);
     if (!rank) {
         te = MPI_Wtime();
