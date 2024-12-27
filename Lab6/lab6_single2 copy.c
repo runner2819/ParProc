@@ -30,7 +30,7 @@ double sort(long *array, long len, const int *gaps, const int s_gap) {
     return 0;
 }
 
-long *merge(long *arr1, long n1, long *arr2, long n2) {
+long *merge(long *arr1, long n1, long *arr2, long n2, int fre) {
     long *result = malloc((n1 + n2) * sizeof(long));
     long i = 0, j = 0, k = 0;
 
@@ -45,6 +45,10 @@ long *merge(long *arr1, long n1, long *arr2, long n2) {
     }
     while (j < n2) {
         result[k++] = arr2[j++];
+    }
+    if (fre) {
+        free(arr1);
+        free(arr2);
     }
     return result;
 }
@@ -66,18 +70,13 @@ int main(int argc, char **argv) {
         displs[i] = offset;
         offset += counts[i];
     }
-    int **gaps = malloc(size * sizeof(int *));
-    int *s_gaps = malloc(size * sizeof(int));
-    for (int rank = 0; rank < size; rank++) {
-        gaps[rank] = malloc(((int) log2(counts[rank]) + 10) * sizeof(int));
-        int s_gap = 0;
-        for (int step = counts[rank] / 2; step > 0; step /= 2) {
-            gaps[rank][s_gap] = step;
-            s_gap++;
-        }
-        gaps[rank] = realloc(gaps[rank], s_gap * sizeof(int));
-        s_gaps[rank] = s_gap;
+    int *gaps = malloc(((int) log2(counts[0]) + 10) * sizeof(int));
+    int s_gap = 0;
+    for (int step = counts[0] / 2; step > 0; step /= 2) {
+        gaps[s_gap] = step;
+        s_gap++;
     }
+    gaps = realloc(gaps, s_gap * sizeof(int));
 
     double start, end, time = 0, ts, te;
 
@@ -92,41 +91,44 @@ int main(int argc, char **argv) {
         memcpy(chunk, array, count * sizeof(long));
         for (int i = 0; i < size; i++) {
             chunks[i] = chunk + displs[i];
-            sort(chunk + displs[i], counts[i], gaps[i], s_gaps[i]);
+            sort(chunks[i], counts[i], gaps, s_gap);
         }
 
 //        long ress_size = counts[0] + counts[1];
-//        long *ress = merge(chunk, counts[0], chunk + displs[1], counts[1]);
-
-//        for (int i = 2; i < size; i++) {
+//        long *ress = malloc(counts[0] * sizeof(long));
+//        memcpy(ress, chunk, counts[0] * sizeof(long));
+//
+//        for (int i = 1; i < size; i++) {
 //            ress = merge(ress, ress_size, chunks[i], counts[i]);
 //            ress_size += counts[i];
 //        }
 //        free(chunk);
+//        free(chunks);
 //        free(ress);
 
         int *chunk_sizes = malloc(size * sizeof(int));
         memcpy(chunk_sizes, counts, size * sizeof(int));
         int ssss = 0;
         for (int step = 1; step < size; step *= 2) {
-            for (int rank = 0; rank < size; rank += 2 * step) {
-                int chunk_size = chunk_sizes[rank];
-                if (rank % (2 * step) == 0) {
-                    int other_rank = rank + step;
+            for (int fake_rank = 0; fake_rank < size; fake_rank += 2 * step) {
+                int chunk_size = chunk_sizes[fake_rank];
+                if (fake_rank % (2 * step) == 0) {
+                    int other_rank = fake_rank + step;
                     if (other_rank < size) {
                         ssss++;
                         int other_size = chunk_sizes[other_rank];
-                        long *res = merge(chunks[rank], chunk_size, chunks[other_rank], other_size);
-
+                        chunks[fake_rank] = merge(chunks[fake_rank], chunk_size, chunks[other_rank], other_size, step != 1);
 //                        free(chunks[rank]);
-//                        free(chunks[other_rank]);
 
-                        chunks[rank] = res;
-                        chunk_sizes[rank] += other_size;
+                        chunk_sizes[fake_rank] += other_size;
                     }
                 }
             }
         }
+        free(chunk);
+        free(chunks[0]);
+        free(chunks);
+        free(chunk_sizes);
 //        printf("%d\n", ssss);
 //        free(chunk);
 //        free(ress);
@@ -145,10 +147,6 @@ int main(int argc, char **argv) {
     te = omp_get_wtime();
     free(array);
     printf("total,avg %lf,%lf\n", te - ts, time / num_seed);
-    free(s_gaps);
-    for (int rank = 0; rank < size; rank++) {
-        free(gaps[rank]);
-    }
     free(gaps);
 
 //    ret = MPI_Finalize();
