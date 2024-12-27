@@ -38,12 +38,11 @@ long *merge(long *arr1, long n1, long *arr2, long n2, long *res) {
         } else {
             res[k++] = arr2[j++];
         }
-    if (i < n1) {
-        memcpy(res + k, arr1 + i, (n1 - i - 1) * sizeof(long));
+    while (i < n1) {
+        res[k++] = arr1[i++];
     }
-    k += n1 - i - 1;
-    if (j < n2) {
-        memcpy(res + k, arr2 + j, (n2 - j - 1) * sizeof(long));
+    while (j < n2) {
+        res[k++] = arr2[j++];
     }
 //    return res;
 }
@@ -138,28 +137,41 @@ int main(int argc, char **argv) {
         start = MPI_Wtime();
 
         MPI_Scatterv(array, counts, displs, MPI_LONG, chunk, part_size, MPI_LONG, 0, MPI_COMM_WORLD);
-
+        long **chunks = malloc(part * sizeof(long *));
         for (int i = 0; i < part; i++) {
-//            sort(chunk + displs_m[rank * part + i], counts_m[rank * part + i], gaps[i], s_gaps[i]);
-            sort(chunk + displs_m[rank * part + i], counts_m[rank * part + i], gaps, s_gap);
-        }
-
-        long ress_size = counts_m[rank * part] + counts_m[rank * part + 1];
-        long *ress = malloc(ress_size * sizeof(long));
-        merge(chunk, counts_m[rank * part], chunk + displs_m[rank * part + 1], counts_m[rank * part + 1], ress);
-        long *tmp;
-
-        for (int i = 2; i < part; i++) {
-            int n1 = ress_size, n2 = counts_m[rank * part + i];
-            tmp = malloc((n1 + n2) * sizeof(long));
-            merge(ress, ress_size, chunk + displs_m[rank * part + i], counts_m[rank * part + i], tmp);
-            ress_size += counts_m[rank * part + i];
-            free(ress);
-            ress = tmp;
+            int chunk_size = counts_m[rank * part + i];
+            chunks[i] = malloc(chunk_size * sizeof(long));
+            memcpy(chunks[i], chunk + displs[rank * part + i], chunk_size * sizeof(long));
+            sort(chunks[i], chunk_size, gaps, s_gap);
         }
         free(chunk);
-        chunk = ress;
-        int chunk_size = ress_size;
+
+        int *chunk_sizes = malloc(magick * sizeof(int));
+        memcpy(chunk_sizes, counts, magick * sizeof(int));
+        for (int step = 1; step < size; step *= 2) {
+            for (int i = 0; i < size; i += 2 * step) {
+                int chunk_size = chunk_sizes[i];
+                if (i % (2 * step) == 0) {
+                    int other_i = i + step;
+                    if (other_i < size) {
+                        int other_size = chunk_sizes[other_i];
+                        long *res = malloc((chunk_size + other_size) * sizeof(long));
+                        merge(chunks[i], chunk_size, chunks[other_i], other_size, res);
+
+                        free(chunks[i]);
+                        free(chunks[other_i]);
+
+                        chunks[i] = res;
+                        chunk_sizes[i] += other_size;
+                    }
+                }
+            }
+        }
+
+        chunk = chunks[0];
+        int chunk_size = chunk_sizes[0];
+        free(chunks);
+        free(chunk_sizes);
 
         long *other;
         int step = 1;

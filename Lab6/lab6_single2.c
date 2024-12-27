@@ -46,16 +46,16 @@ long *merge(long *arr1, long n1, long *arr2, long n2) {
     while (j < n2) {
         result[k++] = arr2[j++];
     }
-
     return result;
 }
+
 
 int main(int argc, char **argv) {
     int size = 840;    ///< Total number of processors
 //    int rank = -1;    ///< This processor's number
     const int count = 1e7;
     const long random_seed = 920215;
-    const int num_seed = 1;
+    const int num_seed = 30;
 
     long *array;
     int *counts = malloc(size * sizeof(int));
@@ -86,43 +86,52 @@ int main(int argc, char **argv) {
 
     for (int seed_num = 0; seed_num < num_seed; seed_num++) {
         generate_array(array, count, random_seed + seed_num * 1024);
+        long *chunk = malloc(count * sizeof(long));
         long **chunks = malloc(size * sizeof(long *));
         start = omp_get_wtime();
-        for (int rank = 0; rank < size; rank++) {
-            int chunk_size = counts[rank];
-            chunks[rank] = malloc(chunk_size * sizeof(long));
-            memcpy(chunks[rank], array + displs[rank], chunk_size * sizeof(long));
-            sort(chunks[rank], chunk_size, gaps[rank], s_gaps[rank]);
+        memcpy(chunk, array, count * sizeof(long));
+        for (int i = 0; i < size; i++) {
+            chunks[i] = chunk + displs[i];
+            sort(chunk + displs[i], counts[i], gaps[i], s_gaps[i]);
         }
 
-        int *chunk_sizes = malloc(size * sizeof(int));
-        memcpy(chunk_sizes, counts, size * sizeof(int));
-        int ssss = 0;
-        for (int step = 1; step < size; step *= 2) {
-            for (int rank = 0; rank < size; rank += 2 * step) {
-                int chunk_size = chunk_sizes[rank];
-                if (rank % (2 * step) == 0) {
-                    int other_rank = rank + step;
-                    if (other_rank < size) {
-                        ssss++;
-                        int other_size = chunk_sizes[other_rank];
-                        long *res = merge(chunks[rank], chunk_size, chunks[other_rank], other_size);
+        long ress_size = counts[0] + counts[1];
+        long *ress = merge(chunk, counts[0], chunk + displs[1], counts[1]);
 
-                        free(chunks[rank]);
-                        free(chunks[other_rank]);
-
-                        chunks[rank] = res;
-                        chunk_sizes[rank] += other_size;
-                    }
-                }
-            }
+        for (int i = 2; i < size; i++) {
+            ress = merge(ress, ress_size, chunks[i], counts[i]);
+            ress_size += counts[i];
         }
-        printf("%d\n", ssss);
+//        free(chunk);
+//        free(ress);
+
+//        int *chunk_sizes = malloc(size * sizeof(int));
+//        memcpy(chunk_sizes, counts, size * sizeof(int));
+//        int ssss = 0;
+//        for (int step = 1; step < size; step *= 2) {
+//            for (int rank = 0; rank < size; rank += 2 * step) {
+//                int chunk_size = chunk_sizes[rank];
+//                if (rank % (2 * step) == 0) {
+//                    int other_rank = rank + step;
+//                    if (other_rank < size) {
+//                        ssss++;
+//                        int other_size = chunk_sizes[other_rank];
+//                        long *res = merge(chunks[rank], chunk_size, chunks[other_rank], other_size);
+
+//                        free(chunks[rank]);
+//                        free(chunks[other_rank]);
+//
+//                        chunks[rank] = res;
+//                        chunk_sizes[rank] += other_size;
+//                    }
+//                }
+//            }
+//        }
+//        printf("%d\n", ssss);
+//        free(chunk);
+//        free(ress);
         end = omp_get_wtime();
         time += end - start;
-        free(chunks[0]);
-        free(chunks);
-        free(chunk_sizes);
     }
 
     free(counts);
