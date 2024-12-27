@@ -57,9 +57,9 @@ long *merge(long *arr1, long n1, long *arr2, long n2, int fre) {
 int main(int argc, char **argv) {
     int size = 840;    ///< Total number of processors
 //    int rank = -1;    ///< This processor's number
-    const int count = 1e7;
+    const int count = 1e8;
     const long random_seed = 920215;
-    const int num_seed = 1;
+    const int num_seed = 30;
 
     long *array;
     int *counts = malloc(size * sizeof(int));
@@ -108,28 +108,20 @@ int main(int argc, char **argv) {
 
         int *chunk_sizes = malloc(size * sizeof(int));
         memcpy(chunk_sizes, counts, size * sizeof(int));
-        int ssss = 0;
         for (int step = 1; step < size; step *= 2) {
             for (int fake_rank = 0; fake_rank < size; fake_rank += 2 * step) {
                 int chunk_size = chunk_sizes[fake_rank];
                 if (fake_rank % (2 * step) == 0) {
                     int other_rank = fake_rank + step;
                     if (other_rank < size) {
-                        ssss++;
                         int other_size = chunk_sizes[other_rank];
                         chunks[fake_rank] = merge(chunks[fake_rank], chunk_size, chunks[other_rank], other_size, step != 1);
-//                        free(chunks[rank]);
-
                         chunk_sizes[fake_rank] += other_size;
                     }
                 }
             }
         }
-        free(chunk);
-        free(chunks[0]);
-        free(chunks);
-        free(chunk_sizes);
-//        printf("%d\n", ssss);
+
 //        free(chunk);
 //        free(ress);
 //        for (int ii = 0; ii < count; ii++) {
@@ -139,6 +131,10 @@ int main(int argc, char **argv) {
 //        }
         end = omp_get_wtime();
         time += end - start;
+        free(chunk);
+        free(chunks[0]);
+        free(chunks);
+        free(chunk_sizes);
     }
 
     free(counts);
