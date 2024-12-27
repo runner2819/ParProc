@@ -30,7 +30,7 @@ double sort(long *array, long len, const int *gaps, const int s_gap) {
     return 0;
 }
 
-long *merge(long *arr1, long n1, long *arr2, long n2, int fre) {
+long *merge(long *arr1, long n1, long *arr2, long n2, int fre1, int fre2) {
     long *result = malloc((n1 + n2) * sizeof(long));
     long i = 0, j = 0, k = 0;
 
@@ -46,8 +46,10 @@ long *merge(long *arr1, long n1, long *arr2, long n2, int fre) {
     while (j < n2) {
         result[k++] = arr2[j++];
     }
-    if (fre) {
+    if (fre1) {
         free(arr1);
+    }
+    if (fre2) {
         free(arr2);
     }
     return result;
@@ -106,15 +108,14 @@ int main(int argc, char **argv) {
                     if (other_rank < size) {
                         int other_size = chunk_sizes[other_rank];
                         chunks[fake_rank] = merge(chunks[fake_rank], chunk_size, chunks[other_rank], other_size,
-                                                  tofree[fake_rank] + tofree[other_rank]);
+                                                  tofree[fake_rank], tofree[other_rank]);
                         tofree[fake_rank] = 1;
+                        tofree[other_rank] = 0;
                         chunk_sizes[fake_rank] += other_size;
                     }
                 }
             }
         }
-        free(chunk);
-//
 //        free(ress);
 //        for (int ii = 0; ii < count; ii++) {
 //            if (ress[ii] != chunks[0][ii]) {
@@ -123,6 +124,13 @@ int main(int argc, char **argv) {
 //        }
         end = omp_get_wtime();
         time += end - start;
+        free(chunk);
+        for (int i = 1; i < size; i++) {
+            if (tofree[i]) {
+                free(chunks[i]);
+            }
+        }
+        free(tofree);
         free(chunks[0]);
         free(chunks);
         free(chunk_sizes);

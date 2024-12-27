@@ -30,7 +30,7 @@ double sort(long *array, long len, const int *gaps, const int s_gap) {
     return 0;
 }
 
-long *merge(long *arr1, long n1, long *arr2, long n2, int fre) {
+long *merge(long *arr1, long n1, long *arr2, long n2, int fre1, int fre2) {
     long *result = malloc((n1 + n2) * sizeof(long));
     long i = 0, j = 0, k = 0;
 
@@ -46,11 +46,11 @@ long *merge(long *arr1, long n1, long *arr2, long n2, int fre) {
     while (j < n2) {
         result[k++] = arr2[j++];
     }
-    if (fre) {
+    if (fre1) {
         free(arr1);
-        if (fre > 1) {
-            free(arr2);
-        }
+    }
+    if (fre2) {
+        free(arr2);
     }
     return result;
 }
@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
     int magick = 840;
     const int count = 1e8;
     const long random_seed = 920215;
-    const int num_seed = 1;
+    const int num_seed = 30;
 
     ret = MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -131,6 +131,7 @@ int main(int argc, char **argv) {
     for (int seed_num = 0; seed_num < num_seed; seed_num++) {
         if (!rank) {
             generate_array(array, count, random_seed + seed_num * 1024);
+            printf("%d\n", seed_num);
         }
         long *chunk = malloc(part_size * sizeof(long));
         MPI_Barrier(MPI_COMM_WORLD);
@@ -160,15 +161,19 @@ int main(int argc, char **argv) {
                     if (other_rank < part) {
                         int other_size = chunk_sizes[other_rank];
                         chunks[fake_rank] = merge(chunks[fake_rank], chunk_size, chunks[other_rank], other_size,
-                                                  tofree[fake_rank] + tofree[other_rank]);
+                                                  tofree[fake_rank], tofree[other_rank]);
                         tofree[fake_rank] = 1;
+                        tofree[other_rank] = 0;
                         chunk_sizes[fake_rank] += other_size;
                     }
                 }
             }
         }
         free(chunk);
-
+        for (int i = 1; i < size; i++) {
+            if (tofree[i])free(chunks[i]);
+        }
+        free(tofree);
         chunk = chunks[0];
         int chunk_size = chunk_sizes[0];
         free(chunks);
@@ -185,7 +190,7 @@ int main(int argc, char **argv) {
                     other = malloc(other_size * sizeof(long));
                     MPI_Recv(other, other_size, MPI_LONG, other_rank, 0, MPI_COMM_WORLD, &status);
 
-                    chunk = merge(chunk, chunk_size, other, other_size, 1);
+                    chunk = merge(chunk, chunk_size, other, other_size, 1, 1);
                     chunk_size += other_size;
                 }
             } else {
