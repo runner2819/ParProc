@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
         gaps[s_gap] = step;
         s_gap++;
     }
-    gaps = realloc(gaps, s_gap * sizeof(int));
+//    gaps = realloc(gaps, s_gap * sizeof(int));
 
     double start, end, time = 0, ts, te;
 
@@ -84,6 +84,7 @@ int main(int argc, char **argv) {
     array = malloc(count * sizeof(long));
 
     for (int seed_num = 0; seed_num < num_seed; seed_num++) {
+        printf("%d\n", seed_num);
         generate_array(array, count, random_seed + seed_num * 1024);
         long *chunk = malloc(count * sizeof(long));
         long **chunks = malloc(size * sizeof(long *));
@@ -93,21 +94,10 @@ int main(int argc, char **argv) {
             chunks[i] = chunk + displs[i];
             sort(chunks[i], counts[i], gaps, s_gap);
         }
-
-//        long ress_size = counts[0] + counts[1];
-//        long *ress = malloc(counts[0] * sizeof(long));
-//        memcpy(ress, chunk, counts[0] * sizeof(long));
-//
-//        for (int i = 1; i < size; i++) {
-//            ress = merge(ress, ress_size, chunks[i], counts[i]);
-//            ress_size += counts[i];
-//        }
-//        free(chunk);
-//        free(chunks);
-//        free(ress);
-
+        printf("%d\n", seed_num);
         int *chunk_sizes = malloc(size * sizeof(int));
         memcpy(chunk_sizes, counts, size * sizeof(int));
+        int *tofree = calloc(size, sizeof(int));
         for (int step = 1; step < size; step *= 2) {
             for (int fake_rank = 0; fake_rank < size; fake_rank += 2 * step) {
                 int chunk_size = chunk_sizes[fake_rank];
@@ -115,14 +105,16 @@ int main(int argc, char **argv) {
                     int other_rank = fake_rank + step;
                     if (other_rank < size) {
                         int other_size = chunk_sizes[other_rank];
-                        chunks[fake_rank] = merge(chunks[fake_rank], chunk_size, chunks[other_rank], other_size, step != 1);
+                        chunks[fake_rank] = merge(chunks[fake_rank], chunk_size, chunks[other_rank], other_size,
+                                                  tofree[fake_rank] + tofree[other_rank]);
+                        tofree[fake_rank] = 1;
                         chunk_sizes[fake_rank] += other_size;
                     }
                 }
             }
         }
-
-//        free(chunk);
+        free(chunk);
+//
 //        free(ress);
 //        for (int ii = 0; ii < count; ii++) {
 //            if (ress[ii] != chunks[0][ii]) {
@@ -131,19 +123,18 @@ int main(int argc, char **argv) {
 //        }
         end = omp_get_wtime();
         time += end - start;
-        free(chunk);
         free(chunks[0]);
         free(chunks);
         free(chunk_sizes);
     }
 
     free(counts);
+    free(gaps);
     free(displs);
 //    if (!rank) {
     te = omp_get_wtime();
     free(array);
     printf("total,avg %lf,%lf\n", te - ts, time / num_seed);
-    free(gaps);
 
 //    ret = MPI_Finalize();
     return 0;

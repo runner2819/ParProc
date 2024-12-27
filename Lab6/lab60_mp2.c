@@ -48,7 +48,9 @@ long *merge(long *arr1, long n1, long *arr2, long n2, int fre) {
     }
     if (fre) {
         free(arr1);
-        free(arr2);
+        if (fre > 1) {
+            free(arr2);
+        }
     }
     return result;
 }
@@ -60,7 +62,7 @@ int main(int argc, char **argv) {
     int magick = 840;
     const int count = 1e8;
     const long random_seed = 920215;
-    const int num_seed = 30;
+    const int num_seed = 1;
 
     ret = MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -116,7 +118,7 @@ int main(int argc, char **argv) {
         gaps[s_gap] = step;
         s_gap++;
     }
-    gaps = realloc(gaps, s_gap * sizeof(int));
+//    gaps = realloc(gaps, s_gap * sizeof(int));
 
     double start, end, time = 0, ts, te;
 
@@ -134,6 +136,12 @@ int main(int argc, char **argv) {
         MPI_Barrier(MPI_COMM_WORLD);
         start = MPI_Wtime();
 
+//        if (!rank) {
+//            int i = 1;
+//            while (i) {
+//                sleep(1);
+//            }
+//        }
         MPI_Scatterv(array, counts, displs, MPI_LONG, chunk, part_size, MPI_LONG, 0, MPI_COMM_WORLD);
         long **chunks = malloc(part * sizeof(long *));
         for (int i = 0; i < part; i++) {
@@ -141,8 +149,9 @@ int main(int argc, char **argv) {
             sort(chunks[i], counts_m[rank * part + i], gaps, s_gap);
         }
 
-        int *chunk_sizes = malloc(magick * sizeof(int));
-        memcpy(chunk_sizes, counts_m, magick * sizeof(int));
+        int *chunk_sizes = malloc(part * sizeof(int));
+        memcpy(chunk_sizes, counts_m + part * rank, part * sizeof(int));
+        int *tofree = calloc(part, sizeof(int));
         for (int step = 1; step < part; step *= 2) {
             for (int fake_rank = 0; fake_rank < part; fake_rank += 2 * step) {
                 int chunk_size = chunk_sizes[fake_rank];
@@ -150,14 +159,16 @@ int main(int argc, char **argv) {
                     int other_rank = fake_rank + step;
                     if (other_rank < part) {
                         int other_size = chunk_sizes[other_rank];
-                        chunks[fake_rank] = merge(chunks[fake_rank], chunk_size, chunks[other_rank], other_size, step != 1);
+                        chunks[fake_rank] = merge(chunks[fake_rank], chunk_size, chunks[other_rank], other_size,
+                                                  tofree[fake_rank] + tofree[other_rank]);
+                        tofree[fake_rank] = 1;
                         chunk_sizes[fake_rank] += other_size;
                     }
                 }
             }
         }
-
         free(chunk);
+
         chunk = chunks[0];
         int chunk_size = chunk_sizes[0];
         free(chunks);
@@ -189,9 +200,9 @@ int main(int argc, char **argv) {
         MPI_Barrier(MPI_COMM_WORLD);
         end = MPI_Wtime();
         time += end - start;
-        if (!rank) {
-            free(chunk);
-        }
+//        if (!rank) {
+        free(chunk);
+//        }
     }
 
     free(counts_m);
