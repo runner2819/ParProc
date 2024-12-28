@@ -1,23 +1,8 @@
-repeat 100 times
-    -- get the raw bytes of the artwork into a var
-    tell application "Music" to tell artwork 1 of current track
-        set srcBytes to raw data
-        -- figure out the proper file extension
-        if format is «class PNG » then
-            set ext to ".png"
-        else
-            set ext to ".jpg"
-        end if
-    end tell
-
-    -- get the filename to ~/Desktop/cover.ext
-    set fileName to (((path to desktop) as text) & "All:" & "cover" & ext)
-    -- write to file
-    set outFile to open for access file fileName with write permission
-    -- truncate the file
-    set eof outFile to 0
-    -- write the image bytes to the file
-    write srcBytes to outFile
-    close access outFile
-    sleep 2
-end repeat
+1 & 11,0595 & 1 & 1 \\ \hline
+2 & 5,967508 & 1,853286162 & 0,926643081 \\ \hline
+3 & 4,385036 & 2,522100161 & 0,840700054 \\ \hline
+4 & 3,503883 & 3,156355392 & 0,789088848 \\ \hline
+5 & 3,043952 & 3,63327017 & 0,726654034 \\ \hline
+6 & 2,675316 & 4,133904182 & 0,68898403 \\ \hline
+7 & 2,440115 & 4,532368351 & 0,647481193 \\ \hline
+8 & 2,22805 & 4,963757546 & 0,620469693 \\ \hline

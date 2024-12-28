@@ -97,28 +97,13 @@ int main(int argc, char **argv) {
         offset += counts[i];
     }
 
-/*
-    int **gaps = malloc(part * sizeof(int *));
-    int *s_gaps = malloc(part * sizeof(int));
-    for (int pp = 0; pp < part; pp++) {
-        gaps[pp] = malloc(((int) log2(counts[pp]) + 10) * sizeof(int));
-        int s_gap = 0;
-        for (int step = counts_m[rank * part + pp] / 2; step > 0; step /= 2) {
-            gaps[pp][s_gap] = step;
-            s_gap++;
-        }
-        gaps[pp] = realloc(gaps[pp], s_gap * sizeof(int));
-        s_gaps[pp] = s_gap;
-    }
-*/
-
     int *gaps = malloc(((int) log2(counts_m[rank * part]) + 10) * sizeof(int));
     int s_gap = 0;
     for (int step = counts_m[rank] / 2; step > 0; step /= 2) {
         gaps[s_gap] = step;
         s_gap++;
     }
-//    gaps = realloc(gaps, s_gap * sizeof(int));
+    gaps = realloc(gaps, s_gap * sizeof(int));
 
     double start, end, time = 0, ts, te;
 
@@ -131,18 +116,11 @@ int main(int argc, char **argv) {
     for (int seed_num = 0; seed_num < num_seed; seed_num++) {
         if (!rank) {
             generate_array(array, count, random_seed + seed_num * 1024);
-//            printf("%d\n", seed_num);
         }
         long *chunk = malloc(part_size * sizeof(long));
         MPI_Barrier(MPI_COMM_WORLD);
         start = MPI_Wtime();
 
-//        if (!rank) {
-//            int i = 1;
-//            while (i) {
-//                sleep(1);
-//            }
-//        }
         MPI_Scatterv(array, counts, displs, MPI_LONG, chunk, part_size, MPI_LONG, 0, MPI_COMM_WORLD);
         long **chunks = malloc(part * sizeof(long *));
         for (int i = 0; i < part; i++) {
@@ -205,9 +183,7 @@ int main(int argc, char **argv) {
         MPI_Barrier(MPI_COMM_WORLD);
         end = MPI_Wtime();
         time += end - start;
-//        if (!rank) {
         free(chunk);
-//        }
     }
 
     free(counts_m);

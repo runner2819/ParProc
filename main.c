@@ -13,57 +13,57 @@ void generate_array(long *array, const int count, const int seed) {
     }
 }
 
-int main(int argc, char **argv) {
-    int ret = -1;    ///< For return values
-    int size = -1;    ///< Total number of processors
-    int rank = -1;    ///< This processor's number
-    int divide = 840;
-    const int count = 1e4;
-    const long random_seed = 920215;
-    const int num_seed = 30;
-
-    int part_size = (count + divide - 1) / divide;
-
-    ret = MPI_Init(&argc, &argv);
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Status status;
-
-
-    long *array;
-    int *counts = malloc(divide * sizeof(int));
-    int *displs = malloc(divide * sizeof(int));
-    int offset = 0;
-    for (int i = 0; i < divide; i++) {
-        counts[i] = (long) (i + 1) * count / divide - (long) i * count / divide;
-        displs[i] = offset;
-        offset += counts[i];
-    }
-
-
-    if (!rank) {
-        array = malloc(count * sizeof(long));
-    }
-
-    if (!rank) {
-        generate_array(array, count, random_seed + random_seed * 1024);
-    }
-    long *chunk = malloc(part_size * sizeof(long));
-
-    MPI_Scatterv(array, counts, displs, MPI_LONG, chunk, part_size, MPI_LONG, 0, MPI_COMM_WORLD);
-
-    printf("%d\n", chunk[0]);
-
-    free(chunk);
-
-    free(counts);
-    free(displs);
-    if (!rank) {
-        free(array);
-    }
-    ret = MPI_Finalize();
-    return (0);
-}
+//int main(int argc, char **argv) {
+//    int ret = -1;    ///< For return values
+//    int size = -1;    ///< Total number of processors
+//    int rank = -1;    ///< This processor's number
+//    int divide = 840;
+//    const int count = 1e4;
+//    const long random_seed = 920215;
+//    const int num_seed = 30;
+//
+//    int part_size = (count + divide - 1) / divide;
+//
+//    ret = MPI_Init(&argc, &argv);
+//    MPI_Comm_size(MPI_COMM_WORLD, &size);
+//    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//    MPI_Status status;
+//
+//
+//    long *array;
+//    int *counts = malloc(divide * sizeof(int));
+//    int *displs = malloc(divide * sizeof(int));
+//    int offset = 0;
+//    for (int i = 0; i < divide; i++) {
+//        counts[i] = (long) (i + 1) * count / divide - (long) i * count / divide;
+//        displs[i] = offset;
+//        offset += counts[i];
+//    }
+//
+//
+//    if (!rank) {
+//        array = malloc(count * sizeof(long));
+//    }
+//
+//    if (!rank) {
+//        generate_array(array, count, random_seed + random_seed * 1024);
+//    }
+//    long *chunk = malloc(part_size * sizeof(long));
+//
+//    MPI_Scatterv(array, counts, displs, MPI_LONG, chunk, part_size, MPI_LONG, 0, MPI_COMM_WORLD);
+//
+//    printf("%d\n", chunk[0]);
+//
+//    free(chunk);
+//
+//    free(counts);
+//    free(displs);
+//    if (!rank) {
+//        free(array);
+//    }
+//    ret = MPI_Finalize();
+//    return (0);
+//}
 
 //int main() {
 //    const int count = 100;
@@ -111,27 +111,36 @@ int main(int argc, char **argv) {
 //    }
 //}
 
-//void print_stats(const double *s, const int threads, const int num_seed) {
-//    printf("Time:\n\\def \\time{");
-//    for (int i = 1; i <= threads; i++) {
-//        printf("(%d,%lf)", i, s[i - 1] / num_seed);
-//    }
-//    printf("}");
-//    printf("\nAcceleration:\n\\def \\acc{");
-//    for (int i = 1; i <= threads; i++) {
-//        printf("(%d,%lf)", i, s[0] / s[i - 1]);
-//    }
-//    printf("}");
-//    printf("\nEfficiency:\n\\def \\eff{");
-//    for (int i = 1; i <= threads; i++) {
-//        printf("(%d,%lf)", i, s[0] / s[i - 1] / i);
-//    }
-//    printf("}\n");
-//}
-//
-//int main() {
-//    double s[8] = {44.939674, 20.137259, 11.645667, 10.627241, 7.666202, 6.091503, 5.974657, 5.368062};
-//    print_stats(s, 8, 1);
+void print_stats(const double *s, const int threads, const int num_seed) {
+    printf("Time:\n\\def \\time{");
+    for (int i = 1; i <= threads; i++) {
+        printf("(%d,%lf)", i, s[i - 1] / num_seed);
+    }
+    printf("}");
+    printf("\nAcceleration:\n\\def \\acc{");
+    for (int i = 1; i <= threads; i++) {
+        printf("(%d,%lf)", i, s[0] / s[i - 1]);
+    }
+    printf("}");
+    printf("\nEfficiency:\n\\def \\eff{");
+    for (int i = 1; i <= threads; i++) {
+        printf("(%d,%lf)", i, s[0] / s[i - 1] / i);
+    }
+    printf("}\n");
+}
+
+int main() {
+//    total,avg 353.169312,11.059500
+//total,avg 201.063829,5.967508
+//total,avg 154.066790,4.385036
+//total,avg 127.524624,3.503883
+//total,avg 113.214695,3.043952
+//total,avg 102.816482,2.675316
+//total,avg 96.034986,2.440115
+//total,avg 89.672014,2.228050
+
+    double s[8] = {11.0595,5.967508,4.385036,3.503883,3.043952,2.675316,2.440115,2.22805};
+    print_stats(s, 8, 1);
 //    unsigned long long t = 1;
 //    for (int i = 0; i < 100; i++) {
 //        if (is_prime(i)) {
@@ -160,5 +169,5 @@ int main(int argc, char **argv) {
 //    for (int i = 0; i < 10; i++) {
 //        system("echo \"\a\"");
 //    }
-//return 0;
-//}
+return 0;
+}
