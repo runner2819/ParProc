@@ -406,9 +406,6 @@ void *qoi_encode(const void *data, const qoi_desc *desc, int *out_len) {
     px_len = desc->width * desc->height * desc->channels;
     px_end = px_len - desc->channels;
     channels = desc->channels;
-//#pragma omp parallel num_threads(2)
-//    {
-//#pragma omp for
     for (px_pos = 0; px_pos < px_len; px_pos += channels) {
         px.rgba.r = pixels[px_pos + 0];
         px.rgba.g = pixels[px_pos + 1];
@@ -475,7 +472,6 @@ void *qoi_encode(const void *data, const qoi_desc *desc, int *out_len) {
         }
         px_prev = px;
     }
-//    }
 
     for (i = 0; i < (int) sizeof(qoi_padding); i++) {
         bytes[p++] = qoi_padding[i];
