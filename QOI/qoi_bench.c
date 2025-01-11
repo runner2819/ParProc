@@ -415,13 +415,13 @@ benchmark_result_t benchmark_image(const char *path, int num_threads) {
 
     if (!opt_noverify) {
         qoi_desc dc;
-        void *pixels_qoi = qoi_decode(encoded_qoi, encoded_qoi_size, &dc, channels);
+        void *pixels_qoi = qoi_decode(encoded_qoi, encoded_qoi_size, &dc, channels, num_threads);
         char *a = pixels, *b = pixels_qoi;
-        for (int i = 0; i < w * h * channels; i++) {
-            if (a[i] != b[i]) {
-                printf("%d %\n", i);
-            }
-        }
+//        for (int i = 0; i < w * h * channels; i++) {
+//            if (a[i] != b[i]) {
+//                printf("%d %\n", i);
+//            }
+//        }
         if (memcmp(pixels, pixels_qoi, w * h * channels) != 0) {
             ERROR("QOI roundtrip pixel mismatch for %s", path);
         }
@@ -456,7 +456,7 @@ benchmark_result_t benchmark_image(const char *path, int num_threads) {
 
         BENCHMARK_FN(opt_nowarmup, opt_runs, res.libs[QOI].decode_time, {
             qoi_desc desc;
-            void *dec_p = qoi_decode(encoded_qoi, encoded_qoi_size, &desc, 4);
+            void *dec_p = qoi_decode(encoded_qoi, encoded_qoi_size, &desc, 4, num_threads);
             free(dec_p);
         });
     }

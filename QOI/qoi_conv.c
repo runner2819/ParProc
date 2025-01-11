@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
         puts("  qoiconv input.qoi output.png 1");
         exit(1);
     }
-
+    int num_threads = atoi(argv[3]);
     void *pixels = NULL;
     int w, h, channels;
     if (STR_ENDS_WITH(argv[1], ".png")) {
@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
             printf("Couldn't read header %s\n", argv[1]);
             exit(1);
         }
-
+//        channels = 4;
         // Force all odd encodings to be RGBA
         if (channels != 3) {
             channels = 4;
@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
         pixels = (void *) stbi_load(argv[1], &w, &h, NULL, channels);
     } else if (STR_ENDS_WITH(argv[1], ".qoi")) {
         qoi_desc desc;
-        pixels = qoi_read(argv[1], &desc, 0);
+        pixels = qoi_read(argv[1], &desc, 0, num_threads);
         channels = desc.channels;
         w = desc.width;
         h = desc.height;
@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
                 .height = h,
                 .channels = channels,
                 .colorspace = QOI_SRGB
-        }, atoi(argv[3]));
+        }, num_threads);
     }
 
     if (!encoded) {
