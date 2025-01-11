@@ -606,8 +606,6 @@ void *qoi_decode(const void *data, int size, qoi_desc *desc, int channels, int n
                     run = (b1 & 0x3f);
                 }
                 index[QOI_COLOR_HASH(px) % 64] = px;
-            } else {
-                printf("sadf");
             }
 
             pixels[px_pos + 0] = px.rgba.r;
@@ -621,43 +619,42 @@ void *qoi_decode(const void *data, int size, qoi_desc *desc, int channels, int n
 
         return pixels;
     } else {
-        int dist = px_len / num_threads * 0.8;
+        int dist = px_len / num_threads * 0.95;
 //        int *known_px = malloc(((int) px_len / dist + 1) * sizeof(int));
         int *known_px = malloc(chunks_len * sizeof(int));
         int known_px_cnt = 1;
-        known_px[0] = p;
+        known_px[0] = p++;
         px_pos = 0;
         int last = 0;
-        for (int i = p + 1; i < chunks_len; i++) {
-            int b1 = bytes[i++];
+        while (p < chunks_len - 1) {
+            int b1 = bytes[p++];
             if (b1 == QOI_OP_RGB) {
                 if (px_pos - last > dist) {
-                    known_px[known_px_cnt++] = i - 1;
+                    known_px[known_px_cnt++] = p - 1;
                     last = px_pos;
                 }
-                i += 3;
+                p += 3;
             } else if (b1 == QOI_OP_RGBA) {
                 if (px_pos - last > dist) {
-                    known_px[known_px_cnt++] = i - 1;
+                    known_px[known_px_cnt++] = p - 1;
                     last = px_pos;
                 }
-                i += 4;
+                p += 4;
             } else if ((b1 & QOI_MASK_2) == QOI_OP_LUMA) {
-                i++;
+                p++;
             } else if ((b1 & QOI_MASK_2) == QOI_OP_RUN) {
                 run = (b1 & 0x3f);
             }
-            if (run == 0) {
-                run = 1;
-            }
+            run = (run == 0) ? 1 : run + 1;
             px_pos += channels * run;
             run = 0;
         }
         known_px[known_px_cnt++] = chunks_len;
+//        printf("%d", known_px_cnt);
         known_px = realloc(known_px, known_px_cnt * sizeof(int));
         unsigned char *local_pixels[known_px_cnt - 1];
         int local_sizes[known_px_cnt - 1];
-#pragma omp parallel num_threads(num_threads) private(run, px_pos, px,p) shared(local_pixels, local_sizes, known_px, known_px_cnt, bytes, px_len, channels) default(none)
+#pragma omp parallel num_threads(num_threads) private(run, px_pos, px, p) shared(local_pixels, local_sizes, known_px, known_px_cnt, bytes, px_len, channels) default(none)
         {
 
 #pragma omp for schedule(guided)

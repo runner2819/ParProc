@@ -43,7 +43,6 @@ int main(int argc, char **argv) {
             printf("Couldn't read header %s\n", argv[1]);
             exit(1);
         }
-//        channels = 4;
         // Force all odd encodings to be RGBA
         if (channels != 3) {
             channels = 4;
