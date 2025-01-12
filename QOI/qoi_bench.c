@@ -382,7 +382,7 @@ void benchmark_print_result(benchmark_result_t res) {
     } while (0)
 
 
-benchmark_result_t benchmark_image(const char *path, int num_threads) {
+benchmark_result_t benchmark_image(const char *path, int num_threads_enc, int num_threads_dec) {
     int encoded_png_size;
     int encoded_qoi_size;
     int w;
@@ -405,7 +405,7 @@ benchmark_result_t benchmark_image(const char *path, int num_threads) {
             .height = h,
             .channels = channels,
             .colorspace = QOI_SRGB
-    }, &encoded_qoi_size, num_threads);
+    }, &encoded_qoi_size, num_threads_enc);
 
     if (!pixels || !encoded_qoi || !encoded_png) {
         ERROR("Error encoding %s", path);
@@ -415,7 +415,7 @@ benchmark_result_t benchmark_image(const char *path, int num_threads) {
 
     if (!opt_noverify) {
         qoi_desc dc;
-        void *pixels_qoi = qoi_decode(encoded_qoi, encoded_qoi_size, &dc, channels, num_threads);
+        void *pixels_qoi = qoi_decode(encoded_qoi, encoded_qoi_size, &dc, channels, 1);
         char *a = pixels, *b = pixels_qoi;
 //        for (int i = 0; i < w * h * channels; i++) {
 //            if (a[i] != b[i]) {
@@ -456,7 +456,7 @@ benchmark_result_t benchmark_image(const char *path, int num_threads) {
 
         BENCHMARK_FN(opt_nowarmup, opt_runs, res.libs[QOI].decode_time, {
             qoi_desc desc;
-            void *dec_p = qoi_decode(encoded_qoi, encoded_qoi_size, &desc, 4, num_threads);
+            void *dec_p = qoi_decode(encoded_qoi, encoded_qoi_size, &desc, 4, num_threads_dec);
             free(dec_p);
         });
     }
@@ -486,7 +486,7 @@ benchmark_result_t benchmark_image(const char *path, int num_threads) {
                     .height = h,
                     .channels = channels,
                     .colorspace = QOI_SRGB
-            }, &enc_size, num_threads);
+            }, &enc_size, num_threads_enc);
             res.libs[QOI].size = enc_size;
             free(enc_p);
         });
@@ -499,7 +499,7 @@ benchmark_result_t benchmark_image(const char *path, int num_threads) {
     return res;
 }
 
-void benchmark_directory(const char *path, benchmark_result_t *grand_total, int num_threads) {
+void benchmark_directory(const char *path, benchmark_result_t *grand_total, int num_threads_enc, int num_threads_dec) {
     DIR *dir = opendir(path);
     if (!dir) {
         ERROR("Couldn't open directory %s", path);
@@ -516,7 +516,7 @@ void benchmark_directory(const char *path, benchmark_result_t *grand_total, int 
                     ) {
                 char subpath[1024];
                 snprintf(subpath, 1024, "%s/%s", path, file->d_name);
-                benchmark_directory(subpath, grand_total, num_threads);
+                benchmark_directory(subpath, grand_total, num_threads_enc, num_threads_dec);
             }
         }
         rewinddir(dir);
@@ -538,7 +538,7 @@ void benchmark_directory(const char *path, benchmark_result_t *grand_total, int 
         char *file_path = malloc(strlen(file->d_name) + strlen(path) + 8);
         sprintf(file_path, "%s/%s", path, file->d_name);
 
-        benchmark_result_t res = benchmark_image(file_path, num_threads);
+        benchmark_result_t res = benchmark_image(file_path, num_threads_enc, num_threads_dec);
 
         if (!opt_onlytotals) {
             printf("## %s size: %dx%d\n", file_path, res.w, res.h);
@@ -574,8 +574,8 @@ void benchmark_directory(const char *path, benchmark_result_t *grand_total, int 
 }
 
 int main(int argc, char **argv) {
-    if (argc < 4) {
-        printf("Usage: qoibench <iterations> <directory> <num_threads> [options]\n");
+    if (argc < 5) {
+        printf("Usage: qoibench <iterations> <directory> <num_threads_enc> <num_threads_dec> [options]\n");
         printf("Options:\n");
         printf("    --nowarmup ... don't perform a warmup run\n");
         printf("    --nopng ...... don't run png encode/decode\n");
@@ -585,12 +585,12 @@ int main(int argc, char **argv) {
         printf("    --norecurse .. don't descend into directories\n");
         printf("    --onlytotals . don't print individual image results\n");
         printf("Examples\n");
-        printf("    qoibench 10 images/textures/ 1\n");
-        printf("    qoibench 1 images/textures/ 1 --nopng --nowarmup\n");
+        printf("    qoibench 10 images/textures/ 1 1\n");
+        printf("    qoibench 1 images/textures/ 1 1--nopng --nowarmup\n");
         exit(1);
     }
 
-    for (int i = 4; i < argc; i++) {
+    for (int i = 5; i < argc; i++) {
         if (strcmp(argv[i], "--nowarmup") == 0) { opt_nowarmup = 1; }
         else if (strcmp(argv[i], "--nopng") == 0) { opt_nopng = 1; }
         else if (strcmp(argv[i], "--noverify") == 0) { opt_noverify = 1; }
@@ -607,9 +607,10 @@ int main(int argc, char **argv) {
     }
 
     benchmark_result_t grand_total = {0};
-    int num_threads = atoi(argv[3]);
+    int num_threads_enc = atoi(argv[3]);
+    int num_threads_dec = atoi(argv[4]);
 
-    benchmark_directory(argv[2], &grand_total, num_threads);
+    benchmark_directory(argv[2], &grand_total, num_threads_enc, num_threads_dec);
 
     if (grand_total.count > 0) {
         printf("# Grand total for %s\n", argv[2]);
