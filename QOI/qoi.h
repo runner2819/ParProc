@@ -235,6 +235,8 @@ how chunks are en-/decoded. */
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
+
 
 #define QOI_SRGB   0
 #define QOI_LINEAR 1
@@ -407,7 +409,7 @@ void *qoi_encode(const void *data, const qoi_desc *desc, int *out_len, int num_t
         int end = (tid == num_threads - 1) ? px_len * desc->channels : start + chunk_size * desc->channels;
 
         qoi_rgba_t local_index[64] = {0};
-        char local_index_in[64] = {0};
+        bool local_index_in[64] = {0};
         if (tid == 0) {
             px_prev.rgba.r = 0;
             px_prev.rgba.g = 0;
@@ -453,7 +455,7 @@ void *qoi_encode(const void *data, const qoi_desc *desc, int *out_len, int num_t
                     local_bytes[tid][local_p++] = QOI_OP_INDEX | index_pos;
                 } else {
                     local_index[index_pos] = px;
-                    local_index_in[index_pos] = 1;
+                    local_index_in[index_pos] = true;
                     if (px.rgba.a == px_prev.rgba.a) {
                         signed char vr = px.rgba.r - px_prev.rgba.r;
                         signed char vg = px.rgba.g - px_prev.rgba.g;
@@ -652,7 +654,7 @@ void *qoi_decode(const void *data, int size, qoi_desc *desc, int channels, int n
                 px.rgba.a = 255;
                 run = 0;
                 qoi_rgba_t local_index[64] = {0};
-                char local_index_in[64] = {0};
+                bool local_index_in[64] = {0};
                 px_pos = 0;
                 local_pixels[i] = malloc(px_len);
                 p = known_px[i];
@@ -687,7 +689,7 @@ void *qoi_decode(const void *data, int size, qoi_desc *desc, int channels, int n
                     }
                     int index_pos = QOI_COLOR_HASH(px) % 64;
                     local_index[index_pos] = px;
-                    local_index_in[index_pos] = 1;
+                    local_index_in[index_pos] = true;
                     run = (run == 0) ? 1 : run + 1;
                     while (run-- > 0) {
                         local_pixels[i][px_pos++] = px.rgba.r;

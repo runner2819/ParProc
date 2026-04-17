@@ -1,6 +1,11 @@
 /cmake-build-debug/
+/cmake-build-debug-*/
 /cmake-build-release/
-/cmake-build-debug-coverage/
+/cmake-build-release-*/
+
+
 /.idea/
 /arrays.txt
 /qoi_images
+/my_test
+/my_test\ copy
